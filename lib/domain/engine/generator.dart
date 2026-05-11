@@ -37,7 +37,7 @@ class Generator {
     final cell = Cell.fromIndex(empty);
 
     for (final digit in digits) {
-      if (_solver.isValid(cells, cell, digit)) {
+      if (_isValid(cells, cell, digit)) {
         cells[empty] = digit;
         if (_fillBacktrack(cells)) return true;
         cells[empty] = 0;
@@ -65,5 +65,22 @@ class Generator {
     }
 
     return Board(cells);
+  }
+
+  bool _isValid(List<int> cells, Cell cell, int digit) {
+    final r = cell.row, c = cell.col;
+    for (int i = 0; i < 9; i++) {
+      if (i != c && cells[r * 9 + i] == digit) return false;
+      if (i != r && cells[i * 9 + c] == digit) return false;
+    }
+    final br = (r ~/ 3) * 3, bc = (c ~/ 3) * 3;
+    for (int dr = 0; dr < 3; dr++) {
+      for (int dc = 0; dc < 3; dc++) {
+        final nr = br + dr, nc = bc + dc;
+        if (nr == r && nc == c) continue;
+        if (cells[nr * 9 + nc] == digit) return false;
+      }
+    }
+    return true;
   }
 }
