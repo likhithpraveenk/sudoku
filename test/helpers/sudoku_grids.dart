@@ -1,9 +1,9 @@
-import 'package:sudoku/domain/models/board.dart';
+import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-class TestBoards {
-  static Board empty() => Board.empty;
+class TestGrids {
+  static SudokuGrid empty() => SudokuGrid();
 
-  static Board simplePuzzle() => Board.fromRows([
+  static SudokuGrid simplePuzzle() => SudokuGrid.fromRows([
     [5, 3, 0, 0, 7, 0, 0, 0, 0],
     [6, 0, 0, 1, 9, 5, 0, 0, 0],
     [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -15,7 +15,7 @@ class TestBoards {
     [0, 0, 0, 0, 8, 0, 0, 7, 9],
   ]);
 
-  static Board simpleSolution() => Board.fromRows([
+  static SudokuGrid simpleSolution() => SudokuGrid.fromRows([
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
     [6, 7, 2, 1, 9, 5, 3, 4, 8],
     [1, 9, 8, 3, 4, 2, 5, 6, 7],
@@ -27,7 +27,7 @@ class TestBoards {
     [3, 4, 5, 2, 8, 6, 1, 7, 9],
   ]);
 
-  static Board boardWithRowConflict() => Board.fromRows([
+  static SudokuGrid gridWithRowConflict() => SudokuGrid.fromRows([
     [5, 3, 0, 0, 7, 0, 0, 0, 5],
     [6, 0, 0, 1, 9, 5, 0, 0, 0],
     [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -39,17 +39,15 @@ class TestBoards {
     [0, 0, 0, 0, 8, 0, 0, 7, 9],
   ]);
 
-  static Board unsolvableBoard() => Board.fromRows([
-    // dart format off
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [5, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9],
-        // dart format on
+  static SudokuGrid unsolvableGrid() => SudokuGrid.fromRows([
+    [5, 3, 0, 0, 7, 0, 0, 0, 0],
+    [6, 0, 0, 1, 9, 5, 0, 0, 0],
+    [0, 9, 8, 0, 0, 0, 0, 6, 0],
+    [5, 0, 0, 0, 6, 0, 0, 0, 3],
+    [4, 0, 0, 8, 0, 3, 0, 0, 1],
+    [7, 0, 0, 0, 2, 0, 0, 0, 6],
+    [0, 6, 0, 0, 0, 0, 2, 8, 0],
+    [0, 0, 0, 4, 1, 9, 0, 0, 5],
+    [0, 0, 0, 0, 8, 0, 0, 7, 9],
   ]);
 }

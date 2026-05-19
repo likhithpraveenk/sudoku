@@ -1,106 +1,95 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sudoku/domain/models/cell.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/services/sudoku_rules.dart';
 
-import '../../helpers/sudoku_boards.dart';
+import '../../helpers/sudoku_grids.dart';
 
 void main() {
   group('SudokuRules', () {
-    late SudokuRules rules;
-
-    setUp(() {
-      rules = const SudokuRules();
-    });
-
     test('peers returns correct cells', () {
-      final board = TestBoards.empty();
-      const cell = Cell(0, 0);
-      final peers = rules.peers(board, cell);
+      final grid = TestGrids.empty();
+      const cell = 0;
+      final peersResult = peers(grid, cell);
 
-      expect(peers.length, 20);
+      expect(peersResult.length, 20);
 
-      expect(peers.contains(cell), isFalse);
+      expect(peersResult.contains(cell), isFalse);
 
-      for (int col = 1; col < 9; col++) {
-        expect(peers.contains(Cell(0, col)), isTrue);
+      for (var col = 1; col < 9; col++) {
+        expect(peersResult.contains(col), isTrue); // row 0, col
       }
 
-      for (int row = 1; row < 9; row++) {
-        expect(peers.contains(Cell(row, 0)), isTrue);
+      for (var row = 1; row < 9; row++) {
+        expect(peersResult.contains(row * 9), isTrue); // row, col 0
       }
 
-      for (int row = 0; row < 3; row++) {
-        for (int col = 1; col < 3; col++) {
-          expect(peers.contains(Cell(row, col)), isTrue);
+      for (var row = 0; row < 3; row++) {
+        for (var col = 1; col < 3; col++) {
+          expect(peersResult.contains(row * 9 + col), isTrue);
         }
       }
     });
 
     test('isConflict detects conflicts correctly', () {
-      final board = TestBoards.empty();
+      final grid = TestGrids.empty();
 
-      expect(rules.isConflict(board, const Cell(0, 1), 5), isFalse);
+      expect(isConflict(grid, 1, 5), isFalse);
 
-      final boardWithConflict = TestBoards.boardWithRowConflict();
+      final gridWithConflict = TestGrids.gridWithRowConflict();
 
-      expect(rules.isConflict(boardWithConflict, const Cell(0, 1), 5), isTrue);
+      expect(isConflict(gridWithConflict, 1, 5), isTrue);
 
-      expect(rules.isConflict(boardWithConflict, const Cell(1, 0), 5), isTrue);
+      expect(isConflict(gridWithConflict, 9, 5), isTrue);
 
-      expect(rules.isConflict(boardWithConflict, const Cell(1, 1), 5), isTrue);
+      expect(isConflict(gridWithConflict, 10, 5), isTrue);
 
-      expect(rules.isConflict(boardWithConflict, const Cell(0, 1), 3), isFalse);
+      expect(isConflict(gridWithConflict, 1, 3), isFalse);
     });
 
     test('isSolved works correctly', () {
-      final solutionBoard = TestBoards.simpleSolution();
+      final solutionGrid = TestGrids.simpleSolution();
 
-      expect(rules.isSolved(solutionBoard, solutionBoard), isTrue);
+      expect(isSolved(solutionGrid, solutionGrid), isTrue);
 
-      final differentBoard = TestBoards.simplePuzzle();
+      final differentGrid = TestGrids.simplePuzzle();
 
-      expect(rules.isSolved(differentBoard, solutionBoard), isFalse);
+      expect(isSolved(differentGrid, solutionGrid), isFalse);
     });
 
     test('applyDigit works correctly', () {
-      final puzzleBoard = TestBoards.simplePuzzle();
-      final solutionBoard = TestBoards.simpleSolution();
+      final puzzleGrid = TestGrids.simplePuzzle();
+      final solutionGrid = TestGrids.simpleSolution();
 
       final puzzle = Puzzle(
-        board: puzzleBoard,
-        solution: solutionBoard,
-        givenMask: List.generate(81, (i) => puzzleBoard.atIndex(i) != 0),
+        grid: puzzleGrid,
+        solution: solutionGrid,
+        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
       );
       final initialState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
 
-      const cell = Cell(0, 2);
-      final newState = rules.applyDigit(initialState, cell, 4);
+      const cell = 2;
+      final newState = applyDigit(initialState, cell, 4);
 
-      expect(newState.board[cell], 4);
+      expect(newState.grid.valueAt(cell), 4);
 
-      expect(newState.notes[const Cell(0, 0).index].contains(4), isFalse);
+      expect(newState.notes[0].contains(4), isFalse);
 
-      expect(newState.notes[const Cell(2, 2).index].contains(4), isFalse);
+      expect(newState.notes[20].contains(4), isFalse);
 
-      expect(newState.notes[const Cell(1, 1).index].contains(4), isFalse);
+      expect(newState.notes[10].contains(4), isFalse);
 
-      expect(newState.notes[cell.index].isEmpty, isTrue);
+      expect(newState.notes[cell].isEmpty, isTrue);
 
-      final incorrectState = rules.applyDigit(newState, const Cell(0, 3), 9);
+      final incorrectState = applyDigit(newState, 3, 9);
 
-      expect(incorrectState.errorCells.contains(const Cell(0, 3)), isTrue);
+      expect(incorrectState.errorCells.contains(3), isTrue);
 
       expect(incorrectState.mistakeCount, 1);
 
-      final correctedState = rules.applyDigit(
-        incorrectState,
-        const Cell(0, 3),
-        6,
-      );
+      final correctedState = applyDigit(incorrectState, 3, 6);
 
-      expect(correctedState.errorCells.contains(const Cell(0, 3)), isFalse);
+      expect(correctedState.errorCells.contains(3), isFalse);
 
       expect(correctedState.mistakeCount, 1);
     });

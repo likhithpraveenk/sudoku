@@ -1,44 +1,42 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sudoku/domain/engine/solver.dart';
-import 'package:sudoku/domain/models/board.dart';
+import 'package:sudoku/domain/engine/backtracker.dart';
+import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-import '../../helpers/sudoku_boards.dart';
+import '../../helpers/sudoku_grids.dart';
 
 void main() {
-  group('Solver', () {
-    late Solver solver;
-
-    setUp(() {
-      solver = const Solver();
-    });
-
+  group('Backtracker Solver', () {
     test('solves a simple puzzle', () {
-      final board = TestBoards.simplePuzzle();
-      final solved = solver.solve(board);
+      final grid = TestGrids.simplePuzzle();
+      final solved = solveGrid(SudokuGrid(values: grid.values));
 
       expect(solved, isNotNull);
-      expect(solved?.cells.every((element) => element != 0), isTrue);
+      expect(solved?.values.every((element) => element != 0), isTrue);
     });
 
     test('returns null for unsolvable puzzle', () {
-      final unsolvableBoard = TestBoards.unsolvableBoard();
-      final solved = solver.solve(unsolvableBoard);
+      final unsolvableGrid = TestGrids.unsolvableGrid();
+      final solved = solveGrid(SudokuGrid(values: unsolvableGrid.values));
 
       expect(solved, isNull);
     });
 
     test('hasUniqueSolution returns true for a puzzle with one solution', () {
-      final board = TestBoards.simplePuzzle();
+      final grid = TestGrids.simplePuzzle();
 
-      expect(solver.hasUniqueSolution(board), isTrue);
+      expect(hasUniqueSolution(SudokuGrid(values: grid.values)), isTrue);
     });
 
     test(
-      'hasUniqueSolution returns false for a puzzle with more than one solution',
+      'hasUniqueSolution returns false for a puzzle with '
+      'more than one solution',
       () {
-        final emptyBoard = Board.empty;
+        final emptyGrid = SudokuGrid();
 
-        expect(solver.hasUniqueSolution(emptyBoard), isFalse);
+        expect(
+          hasUniqueSolution(SudokuGrid(values: emptyGrid.values)),
+          isFalse,
+        );
       },
     );
   });

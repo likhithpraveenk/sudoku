@@ -1,148 +1,151 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sudoku/domain/models/cell.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/services/undo_service.dart';
 
-import '../../helpers/sudoku_boards.dart';
+import '../../helpers/sudoku_grids.dart';
 
 void main() {
   group('UndoService', () {
-    late UndoService undoService;
-
-    setUp(() {
-      undoService = const UndoService();
-    });
-
     test('canUndo returns false for empty history', () {
       final state = GameState.newGame(
         puzzle: Puzzle(
-          board: TestBoards.empty(),
-          solution: TestBoards.empty(),
+          grid: TestGrids.empty(),
+          solution: TestGrids.empty(),
           givenMask: List.generate(81, (_) => false),
         ),
         difficulty: .easy,
       );
-      expect(undoService.canUndo(state), isFalse);
+      expect(canUndo(state), isFalse);
     });
 
     test('canUndo returns true for non-empty history', () {
       final state =
           GameState.newGame(
             puzzle: Puzzle(
-              board: TestBoards.empty(),
-              solution: TestBoards.empty(),
+              grid: TestGrids.empty(),
+              solution: TestGrids.empty(),
               givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
             history: [
               const DigitAction(
-                cell: Cell(0, 0),
+                cellIndex: 0,
                 previousValue: 0,
                 newValue: 1,
+                previousNotes: {},
               ),
             ],
           );
-      expect(undoService.canUndo(state), isTrue);
+      expect(canUndo(state), isTrue);
     });
 
     test('pop does nothing when history is empty', () {
       final state = GameState.newGame(
         puzzle: Puzzle(
-          board: TestBoards.empty(),
-          solution: TestBoards.empty(),
+          grid: TestGrids.empty(),
+          solution: TestGrids.empty(),
           givenMask: List.generate(81, (_) => false),
         ),
         difficulty: .easy,
       );
-      final result = undoService.pop(state);
+      final result = popUndo(state);
       expect(result, equals(state));
     });
 
     test('pop undoes a DigitAction', () {
-      const cell = Cell(0, 0);
+      const cell = 0;
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              board: TestBoards.empty(),
-              solution: TestBoards.empty(),
+              grid: TestGrids.empty(),
+              solution: TestGrids.empty(),
               givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
-            board: TestBoards.empty().setCell(cell, 1),
+            grid: TestGrids.empty().clone()..setValue(cell, 1),
             history: [
-              const DigitAction(cell: cell, previousValue: 0, newValue: 1),
+              const DigitAction(
+                cellIndex: cell,
+                previousValue: 0,
+                newValue: 1,
+                previousNotes: {},
+              ),
             ],
           );
 
-      final result = undoService.pop(initialState);
-      expect(result.board[cell], 0);
+      final result = popUndo(initialState);
+      expect(result.grid.valueAt(cell), 0);
       expect(result.history.isEmpty, isTrue);
     });
 
     test('pop undoes a PencilAction', () {
-      const cell = Cell(0, 0);
+      const cell = 0;
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              board: TestBoards.empty(),
-              solution: TestBoards.empty(),
+              grid: TestGrids.empty(),
+              solution: TestGrids.empty(),
               givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
-            notes: List.generate(81, (_) => <int>{})..[cell.index] = {1},
+            notes: List.generate(81, (_) => <int>{})..[cell] = {1},
             history: [
-              const PencilAction(cell: cell, previousNotes: {}, newNotes: {1}),
+              const PencilAction(
+                cellIndex: cell,
+                previousNotes: {},
+                newNotes: {1},
+              ),
             ],
           );
 
-      final result = undoService.pop(initialState);
+      final result = popUndo(initialState);
 
-      expect(result.notes[cell.index].isEmpty, isTrue);
+      expect(result.notes[cell].isEmpty, isTrue);
       expect(result.history.isEmpty, isTrue);
     });
 
     test('pop undoes an EraseAction', () {
-      const cell = Cell(0, 0);
+      const cell = 0;
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              board: TestBoards.empty(),
-              solution: TestBoards.empty(),
+              grid: TestGrids.empty(),
+              solution: TestGrids.empty(),
               givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
-            board: TestBoards.empty().setCell(cell, 1),
-            notes: List.generate(81, (_) => <int>{})..[cell.index] = {1},
+            grid: TestGrids.empty().clone()..setValue(cell, 1),
+            notes: List.generate(81, (_) => <int>{})..[cell] = {1},
             history: [
               const EraseAction(
-                cell: cell,
+                cellIndex: cell,
                 previousValue: 1,
                 previousNotes: {1},
               ),
             ],
           );
-      final result = undoService.pop(initialState);
+      final result = popUndo(initialState);
 
-      expect(result.board[cell], 1);
-      expect(result.notes[cell.index].contains(1), isTrue);
+      expect(result.grid.valueAt(cell), 1);
+      expect(result.notes[cell].contains(1), isTrue);
       expect(result.history.isEmpty, isTrue);
     });
 
     test('pop undoes an AutoNotesAction', () {
-      const cell = Cell(0, 0);
+      const cell = 0;
       final previousNotes = List.generate(81, (_) => <int>{})
-        ..[cell.index] = {1, 2, 3};
+        ..[cell] = {1, 2, 3};
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              board: TestBoards.empty(),
-              solution: TestBoards.empty(),
+              grid: TestGrids.empty(),
+              solution: TestGrids.empty(),
               givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
@@ -150,9 +153,9 @@ void main() {
             notes: List.generate(81, (_) => <int>{}),
             history: [AutoNotesAction(previousNotes: previousNotes)],
           );
-      final result = undoService.pop(initialState);
+      final result = popUndo(initialState);
 
-      expect(result.notes[cell.index], equals({1, 2, 3}));
+      expect(result.notes[cell], equals({1, 2, 3}));
       expect(result.history.isEmpty, isTrue);
     });
   });
