@@ -1,22 +1,5 @@
-include: package:flutter_lints/flutter.yaml
+include: package:very_good_analysis/analysis_options.yaml
 
 linter:
   rules:
-    - prefer_const_constructors
-    - prefer_const_declarations
-    - prefer_const_literals_to_create_immutables
-    - prefer_single_quotes
-    - require_trailing_commas
-    - prefer_final_locals
-    - avoid_unused_constructor_parameters
-    - always_use_package_imports
-    - directives_ordering
-    - unnecessary_lambdas
-    - sort_pub_dependencies
-    - cancel_subscriptions
-    - combinators_ordering
     - avoid_types_on_closure_parameters
-    - avoid_positional_boolean_parameters
-
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
