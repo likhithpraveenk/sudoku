@@ -1,60 +1,60 @@
-import 'package:sudoku/domain/models/cell.dart';
+import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
-class NoteService {
-  const NoteService();
+/// The [toggleNote] method.
+GameState toggleNote(GameState state, int index, int digit) {
+  if (state.puzzle.isGivenAt(index)) return state;
+  if (state.revealedCells.contains(index)) return state;
+  if (state.grid.valueAt(index) != 0) return state;
 
-  GameState toggle(GameState state, Cell cell, int digit) {
-    if (state.puzzle.isGivenCell(cell)) return state;
-    if (state.revealedCells.contains(cell)) return state;
-    if (state.board[cell] != 0) return state;
+  final current = Set<int>.from(state.notes[index]);
+  final updated = current.contains(digit)
+      ? (current..remove(digit))
+      : (current..add(digit));
 
-    final current = Set<int>.from(state.notes[cell.index]);
-    final updated = current.contains(digit)
-        ? (current..remove(digit))
-        : (current..add(digit));
+  final action = PencilAction(
+    cellIndex: index,
+    previousNotes: Set.from(state.notes[index]),
+    newNotes: Set.from(updated),
+  );
 
-    final action = PencilAction(
-      cell: cell,
-      previousNotes: Set.from(state.notes[cell.index]),
-      newNotes: Set.from(updated),
-    );
+  final newNotes = state.notes.map(Set<int>.from).toList();
+  newNotes[index] = updated;
 
-    final newNotes = state.notes.map(Set<int>.from).toList();
-    newNotes[cell.index] = updated;
+  return state.copyWith(notes: newNotes, history: [...state.history, action]);
+}
 
-    return state.copyWith(notes: newNotes, history: [...state.history, action]);
-  }
+/// The [autoFillNotes] method.
+GameState autoFillNotes(GameState state) {
+  final prevNotes = state.notes.map(Set<int>.from).toList();
 
-  GameState autoFill(GameState state) {
-    final prevNotes = state.notes.map(Set<int>.from).toList();
+  final newNotes = List<Set<int>>.generate(81, (i) {
+    if (state.grid.valueAt(i) != 0 || state.puzzle.isGivenAt(i)) {
+      return <int>{};
+    }
 
-    final newNotes = List<Set<int>>.generate(81, (i) {
-      final cell = Cell.fromIndex(i);
-      if (state.board[cell] != 0 || state.puzzle.isGivenCell(cell)) {
-        return <int>{};
-      }
-      final used = {
-        ...state.board.valuesOfRow(cell),
-        ...state.board.valuesOfCol(cell),
-        ...state.board.valuesOfBox(cell),
-      }..remove(0);
-      return {for (int d = 1; d <= 9; d++) d}..removeAll(used);
-    });
+    final used = <int>{};
+    for (final peer in peersOf(i)) {
+      final v = state.grid.valueAt(peer);
+      if (v != 0) used.add(v);
+    }
 
-    return state.copyWith(
-      notes: newNotes,
-      history: [
-        ...state.history,
-        AutoNotesAction(previousNotes: prevNotes),
-      ],
-    );
-  }
+    return {1, 2, 3, 4, 5, 6, 7, 8, 9}..removeAll(used);
+  });
 
-  GameState clearCell(GameState state, Cell cell) {
-    final newNotes = state.notes.map(Set<int>.from).toList();
-    newNotes[cell.index] = {};
-    return state.copyWith(notes: newNotes);
-  }
+  return state.copyWith(
+    notes: newNotes,
+    history: [
+      ...state.history,
+      AutoNotesAction(previousNotes: prevNotes),
+    ],
+  );
+}
+
+/// The [clearCellNotes] method.
+GameState clearCellNotes(GameState state, int index) {
+  final newNotes = state.notes.map(Set<int>.from).toList();
+  newNotes[index] = {};
+  return state.copyWith(notes: newNotes);
 }

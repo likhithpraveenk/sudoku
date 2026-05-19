@@ -1,58 +1,64 @@
-import 'package:sudoku/domain/models/board.dart';
-import 'package:sudoku/domain/models/cell.dart';
+import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
+import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-class SudokuRules {
-  const SudokuRules();
+/// A public member.
+Set<int> peers(SudokuGrid grid, int index) {
+  return peersOf(index);
+}
 
-  Set<Cell> peers(Board board, Cell cell) => {
-    ...board.rowCells(cell.row),
-    ...board.colCells(cell.col),
-    ...board.boxCells(cell.row ~/ 3, cell.col ~/ 3),
-  }..remove(cell);
+/// The [isConflict] method.
+bool isConflict(SudokuGrid grid, int index, int value) {
+  if (value == 0) return false;
+  return peers(grid, index).any((p) => grid.valueAt(p) == value);
+}
 
-  bool isConflict(Board board, Cell cell, int value) {
-    if (value == 0) return false;
-    return peers(board, cell).any((p) => board[p] == value);
+/// The [isSolved] method.
+bool isSolved(SudokuGrid grid, SudokuGrid solution) {
+  for (var i = 0; i < 81; i++) {
+    if (grid.valueAt(i) != solution.valueAt(i)) return false;
   }
+  return true;
+}
 
-  bool isSolved(Board board, Board solution) =>
-      Board.allCells.every((c) => board[c] == solution[c]);
+/// The [applyDigit] method.
+GameState applyDigit(GameState state, int index, int value) {
+  if (state.puzzle.isGivenAt(index)) return state;
 
-  GameState applyDigit(GameState state, Cell cell, int value) {
-    if (state.puzzle.isGivenCell(cell)) return state;
+  final previousNotes = <int, Set<int>>{};
+  final newNotes = state.notes.map(Set<int>.from).toList();
 
-    final action = DigitAction(
-      cell: cell,
-      previousValue: state.board[cell],
-      newValue: value,
-    );
-
-    final newBoard = state.board.setCell(cell, value);
-
-    final newNotes = state.notes.map(Set<int>.from).toList();
-    if (value != 0) {
-      for (final peer in peers(state.board, cell)) {
-        newNotes[peer.index].remove(value);
-      }
+  if (value != 0) {
+    for (final peerIndex in peersOf(index)) {
+      previousNotes[peerIndex] = Set.from(state.notes[peerIndex]);
+      newNotes[peerIndex].remove(value);
     }
-    newNotes[cell.index].clear();
-
-    final isWrong = value != 0 && value != state.puzzle.solution[cell];
-    final newErrors = Set<Cell>.from(state.errorCells);
-    isWrong ? newErrors.add(cell) : newErrors.remove(cell);
-
-    final next = state.copyWith(
-      board: newBoard,
-      notes: newNotes,
-      history: [...state.history, action],
-      errorCells: newErrors,
-      mistakeCount: isWrong ? state.mistakeCount + 1 : state.mistakeCount,
-    );
-
-    return isSolved(next.board, next.puzzle.solution)
-        ? next.copyWith(isSolved: true)
-        : next;
   }
+  newNotes[index].clear();
+
+  final action = DigitAction(
+    cellIndex: index,
+    previousValue: state.grid.valueAt(index),
+    newValue: value,
+    previousNotes: previousNotes,
+  );
+
+  final isWrong = value != 0 && value != state.puzzle.solution.valueAt(index);
+  final newErrors = Set<int>.from(state.errorCells);
+  isWrong ? newErrors.add(index) : newErrors.remove(index);
+
+  final nextGrid = state.grid.clone()..setValue(index, value);
+
+  final next = state.copyWith(
+    grid: nextGrid,
+    notes: newNotes,
+    history: [...state.history, action],
+    errorCells: newErrors,
+    mistakeCount: isWrong ? state.mistakeCount + 1 : state.mistakeCount,
+  );
+
+  return isSolved(next.grid, next.puzzle.solution)
+      ? next.copyWith(isSolved: true)
+      : next;
 }

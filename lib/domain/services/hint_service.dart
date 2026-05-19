@@ -1,49 +1,117 @@
-import 'package:sudoku/domain/models/board.dart';
-import 'package:sudoku/domain/models/cell.dart';
+import 'package:sudoku/domain/engine/solver.dart';
+import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
+import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/services/sudoku_rules.dart';
 
-enum ValidationResult { correct, hasErrors, complete }
+/// The result of grid validation.
+enum ValidationResult {
+  /// The grid is correct (no errors).
+  correct,
 
-class HintService {
-  const HintService(this._rules);
-  final SudokuRules _rules;
+  /// The grid contains one or more errors.
+  hasErrors,
 
-  GameState revealCell(GameState state, Cell cell) {
-    if (state.puzzle.isGivenCell(cell)) return state;
+  /// The grid is complete (all cells correct).
+  complete,
+}
 
-    final correct = state.puzzle.solution[cell];
-    final newNotes = state.notes.map(Set<int>.from).toList();
-    newNotes[cell.index] = {};
+/// The [revealCell] method.
+GameState revealCell(GameState state, int index) {
+  if (state.puzzle.isGivenAt(index)) return state;
 
-    final next = state.copyWith(
-      board: state.board.setCell(cell, correct),
-      notes: newNotes,
-      revealedCells: {...state.revealedCells, cell},
-      errorCells: Set.from(state.errorCells)..remove(cell),
+  final correct = state.puzzle.solution.valueAt(index);
+  final newNotes = state.notes.map(Set<int>.from).toList();
+  newNotes[index] = {};
+
+  final grid = state.grid.clone()..setValue(index, correct);
+
+  final next = state.copyWith(
+    grid: grid,
+    notes: newNotes,
+    revealedCells: {...state.revealedCells, index},
+    errorCells: Set.from(state.errorCells)..remove(index),
+  );
+
+  return isSolved(next.grid, next.puzzle.solution)
+      ? next.copyWith(isSolved: true)
+      : next;
+}
+
+/// The [applyLogicalHint] method.
+GameState applyLogicalHint(
+  GameState state, {
+  required void Function(String) onHintFound,
+}) {
+  final hint = SudokuSolver().getSingleHint(state.grid);
+  if (hint == null) {
+    // Fall back to revealing the currently selected cell
+    final selected = state.selectedCell;
+    if (selected != null) {
+      onHintFound('Revealed selected cell (Brute-force)');
+      return revealCell(state, selected);
+    }
+    onHintFound('No logical hints available');
+    return state;
+  }
+
+  // A logical hint is found!
+  final difficultyName = hint.getDifficultyLevel().name;
+  final desc = hint.description();
+  onHintFound('${hint.runtimeType} ($difficultyName) - $desc');
+
+  if (hint is DirectHint) {
+    // Set cell value using applyDigit to get all note cleaning, validation,
+    // and history actions
+    return applyDigit(state, hint.cellIndex, hint.value);
+  } else if (hint is IndirectHint) {
+    // Eliminate candidates
+    final currentNotes = Set<int>.from(state.notes[hint.cellIndex]);
+    final updatedNotes = Set<int>.from(currentNotes)
+      ..removeAll(hint.valuesToRemove);
+
+    final action = PencilAction(
+      cellIndex: hint.cellIndex,
+      previousNotes: currentNotes,
+      newNotes: updatedNotes,
     );
 
-    return _rules.isSolved(next.board, next.puzzle.solution)
-        ? next.copyWith(isSolved: true)
-        : next;
+    final newNotes = state.notes.map(Set<int>.from).toList();
+    newNotes[hint.cellIndex] = updatedNotes;
+
+    final nextGrid = state.grid.clone();
+    hint.apply(nextGrid);
+
+    return state.copyWith(
+      grid: nextGrid,
+      notes: newNotes,
+      history: [...state.history, action],
+    );
   }
 
-  GameState validate(GameState state) {
-    final errors = <Cell>{
-      for (final cell in Board.allCells)
-        if (state.board[cell] != 0 &&
-            state.board[cell] != state.puzzle.solution[cell])
-          cell,
-    };
-    return state.copyWith(errorCells: errors);
-  }
+  return state;
+}
 
-  ValidationResult validationResult(GameState state) {
-    if (state.isSolved) return .complete;
-    final hasErrors = Board.allCells.any((cell) {
-      final value = state.board[cell];
-      return value != 0 && value != state.puzzle.solution[cell];
-    });
-    return hasErrors ? .hasErrors : .correct;
+/// The [validate] method.
+GameState validate(GameState state) {
+  final errors = <int>{};
+  for (var i = 0; i < 81; i++) {
+    if (state.grid.valueAt(i) != 0 &&
+        state.grid.valueAt(i) != state.puzzle.solution.valueAt(i)) {
+      errors.add(i);
+    }
   }
+  return state.copyWith(errorCells: errors);
+}
+
+/// The [validationResult] method.
+ValidationResult validationResult(GameState state) {
+  if (state.isSolved) return ValidationResult.complete;
+  for (var i = 0; i < 81; i++) {
+    final value = state.grid.valueAt(i);
+    if (value != 0 && value != state.puzzle.solution.valueAt(i)) {
+      return ValidationResult.hasErrors;
+    }
+  }
+  return ValidationResult.correct;
 }
