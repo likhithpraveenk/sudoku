@@ -7,6 +7,7 @@ import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/shared/breakpoints.dart';
 import 'package:sudoku/presentation/widgets/notes_grid.dart';
 import 'package:sudoku/providers/board_notifier.dart';
+import 'package:sudoku/providers/game_notifier.dart';
 
 class GridWidget extends StatelessWidget {
   const GridWidget({required this.gameState, super.key});
@@ -96,7 +97,13 @@ class _Cell extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         unawaited(HapticFeedback.selectionClick());
-        ref.read(boardProvider.notifier).selectCell(index);
+        if (board.inputMode == .pencil && board.selectedDigit != null) {
+          ref
+              .read(gameProvider.notifier)
+              .inputDigit(index, board.selectedDigit!);
+        } else {
+          ref.read(boardProvider.notifier).selectCell(index);
+        }
       },
       child: Container(
         decoration: BoxDecoration(
