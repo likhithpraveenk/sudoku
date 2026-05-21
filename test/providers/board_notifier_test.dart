@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sudoku/domain/models/input_method.dart';
+import 'package:sudoku/presentation/shared/input_method.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 
 void main() {

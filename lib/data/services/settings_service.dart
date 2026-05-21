@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sudoku/domain/models/grid_placement.dart';
+import 'package:sudoku/presentation/shared/grid_placement.dart';
 
 class SettingsService {
   SettingsService(this._prefs);

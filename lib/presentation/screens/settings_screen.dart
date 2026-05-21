@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/grid_placement.dart';
+import 'package:sudoku/presentation/shared/grid_placement.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {

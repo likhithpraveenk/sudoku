@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sudoku/domain/models/grid_placement.dart';
+import 'package:sudoku/presentation/shared/grid_placement.dart';
 
 class GameLayoutParams {
   const GameLayoutParams({

@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
+import 'package:sudoku/domain/models/utils.dart';
 
 class GameState {
   const GameState({

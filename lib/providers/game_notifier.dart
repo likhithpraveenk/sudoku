@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/board_state.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/services/hint_service.dart';
@@ -9,6 +8,7 @@ import 'package:sudoku/domain/services/note_service.dart';
 import 'package:sudoku/domain/services/puzzle_generator_service.dart';
 import 'package:sudoku/domain/services/sudoku_rules.dart';
 import 'package:sudoku/domain/services/undo_service.dart';
+import 'package:sudoku/presentation/models/board_state.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
 

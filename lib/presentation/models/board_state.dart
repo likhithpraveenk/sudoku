@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:sudoku/domain/models/input_method.dart';
+import 'package:sudoku/presentation/shared/input_method.dart';
 
-@immutable
 class BoardState {
   const BoardState({
     this.selectedCell,

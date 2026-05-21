@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/board_state.dart';
+import 'package:sudoku/presentation/models/board_state.dart';
 
 final boardProvider = NotifierProvider(BoardNotifier.new);
 
