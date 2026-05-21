@@ -29,7 +29,7 @@ class GameState {
   }) => GameState(
     puzzle: puzzle,
     difficulty: difficulty,
-    grid: puzzle.given,
+    grid: puzzle.given.clone(),
     notes: List.generate(81, (_) => {}),
     history: const [],
   );
@@ -69,7 +69,7 @@ class GameState {
       other is GameState &&
           puzzle == other.puzzle &&
           difficulty == other.difficulty &&
-          grid == grid &&
+          grid == other.grid &&
           listEquals(notes, other.notes) &&
           listEquals(history, other.history) &&
           puzzleComplete == other.puzzleComplete &&

@@ -26,15 +26,32 @@ class GameNotifier extends AsyncNotifier<GameState?> {
 
   @override
   Future<GameState?> build() async {
+    ref.onDispose(() {
+      _timer?.cancel();
+    });
     final difficulty = ref.read(difficultyProvider);
     final puzzle = await ref
         .read(puzzleGeneratorServiceProvider)
         .generate(difficulty);
+    _startTimer();
     return GameState.newGame(puzzle: puzzle, difficulty: difficulty);
+  }
+
+  // TODO: stop timer on puzzle complete
+
+  Timer? _timer;
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _update(
+        (s) => s.copyWith(elapsed: s.elapsed + const Duration(seconds: 1)),
+      );
+    });
   }
 
   void restoreGame(GameState saved) {
     state = AsyncData(saved);
+    _startTimer();
   }
 
   void inputDigit(int cellIndex, int digit) => _update((s) {
@@ -82,8 +99,8 @@ class GameNotifier extends AsyncNotifier<GameState?> {
   );
 
   void stopTimer() {
-    // _timer?.cancel();
-    // _timer = null;
+    _timer?.cancel();
+    _timer = null;
   }
 
   bool get canUndo => state.value?.history.isNotEmpty == true;

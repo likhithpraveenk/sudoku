@@ -38,7 +38,7 @@ class BoardState {
           selectedCell == other.selectedCell &&
           selectedDigit == other.selectedDigit &&
           inputMode == other.inputMode &&
-          errorCells == errorCells;
+          errorCells == other.errorCells;
 
   @override
   String toString() {
