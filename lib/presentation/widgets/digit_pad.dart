@@ -17,7 +17,9 @@ class DigitPad extends ConsumerWidget {
     final gameNotifier = ref.read(gameProvider.notifier);
     final boardNotifier = ref.read(boardProvider.notifier);
     final digitCounts = state.grid.digitCounts;
-    final showRemaining = ref.watch(settingsServiceProvider).showRemaining;
+    final showRemaining = ref.watch(
+      settingsProvider.select((s) => s.showRemaining),
+    );
 
     final buttons =
         List.generate(9, (i) {

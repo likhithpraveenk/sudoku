@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudoku/data/services/puzzle_generator_service.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/services/hint_service.dart';

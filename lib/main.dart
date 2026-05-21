@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:sudoku/data/hive_boxes.dart';
 import 'package:sudoku/presentation/screens/home_screen.dart';
 import 'package:sudoku/presentation/widgets/no_scrollbar_behavior.dart';
-import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
+  await Hive.initFlutter();
+  await Future.wait([
+    Hive.openBox<String>(settingsBox),
+    Hive.openBox<String>(themeBox),
+    Hive.openBox<String>(statsBox),
+  ]);
   // debugRepaintRainbowEnabled = true;
-  runApp(
-    ProviderScope(
-      overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
-      child: const MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerWidget {

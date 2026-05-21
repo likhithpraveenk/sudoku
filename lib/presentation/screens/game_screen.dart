@@ -19,7 +19,7 @@ class GameScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gameAsync = ref.watch(gameProvider);
-    final showTimer = ref.watch(settingsServiceProvider).showTimer;
+    final showTimer = ref.watch(settingsProvider.select((s) => s.showTimer));
     final game = gameAsync.value;
 
     final board = ref.watch(boardProvider);
@@ -121,7 +121,7 @@ class _GameBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isExpanded = context.isExpanded;
-    final svc = ref.watch(settingsServiceProvider);
+    final settings = ref.watch(settingsProvider);
 
     final grid = GridWidget(gameState: state);
     const action = ActionRow();
@@ -131,10 +131,10 @@ class _GameBody extends ConsumerWidget {
         ? GameLayoutParams.desktop
         : GameLayoutParams.mobile;
     final params = base.copyWith(
-      gridWidth: svc.gridWidth,
-      horizontalSpacing: svc.horizontalSpacing,
-      verticalSpacing: svc.verticalSpacing,
-      placement: svc.placement,
+      gridWidth: settings.gridWidth,
+      horizontalSpacing: settings.horizontalSpacing,
+      verticalSpacing: settings.verticalSpacing,
+      placement: settings.placement,
     );
 
     return GameLayout(

@@ -2,13 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sudoku/core/theme/theme.dart';
-import 'package:sudoku/providers/settings_provider.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:sudoku/data/hive_boxes.dart';
+import 'package:sudoku/presentation/models/theme_config.dart';
 
 final themeConfigProvider = NotifierProvider(ThemeNotifier.new);
 
 final kShape = RoundedRectangleBorder(borderRadius: .circular(6));
+
+final customThemeProvider = NotifierProvider(CustomThemeNotifier.new);
+
+final allThemesProvider = Provider((ref) {
+  final custom = ref.watch(customThemeProvider);
+  return [...builtInThemes, ...custom];
+});
 
 final currentThemeProvider = Provider((ref) {
   final config = ref.watch(themeConfigProvider);
@@ -39,13 +46,13 @@ final currentThemeProvider = Provider((ref) {
 });
 
 class ThemeNotifier extends Notifier<ThemeConfig> {
-  static const _key = 'sudoku_theme_config';
+  static const _key = 'theme_config';
 
-  SharedPreferences get prefs => ref.read(sharedPrefsProvider);
+  Box<String> get box => Hive.box(themeBox);
 
   @override
   ThemeConfig build() {
-    final json = prefs.getString(_key);
+    final json = box.get(_key);
     if (json != null) {
       return ThemeConfig.fromJson(jsonDecode(json) as Map<String, dynamic>);
     }
@@ -58,20 +65,21 @@ class ThemeNotifier extends Notifier<ThemeConfig> {
   }
 
   Future<void> _persist(ThemeConfig config) async {
-    await prefs.setString(_key, jsonEncode(config));
+    await box.put(_key, jsonEncode(config));
   }
 }
 
 class CustomThemeNotifier extends Notifier<List<ThemeConfig>> {
-  static const _key = 'sudoku_custom_themes';
+  static const _key = 'custom_themes';
+
+  Box<String> get box => Hive.box(themeBox);
 
   @override
   List<ThemeConfig> build() {
-    final prefs = ref.watch(sharedPrefsProvider);
-    final json = prefs.getString(_key);
+    final json = box.get(_key);
     if (json == null) return [];
     return (jsonDecode(json) as List)
-        .map((e) => ThemeConfig.fromJson(e as Map<String, dynamic>))
+        .map((t) => ThemeConfig.fromJson(t as Map<String, dynamic>))
         .toList();
   }
 
@@ -86,14 +94,6 @@ class CustomThemeNotifier extends Notifier<List<ThemeConfig>> {
   }
 
   Future<void> _persist() async {
-    final prefs = ref.read(sharedPrefsProvider);
-    await prefs.setString(_key, jsonEncode(state));
+    await box.put(_key, jsonEncode(state));
   }
 }
-
-final customThemeProvider = NotifierProvider(CustomThemeNotifier.new);
-
-final allThemesProvider = Provider((ref) {
-  final custom = ref.watch(customThemeProvider);
-  return [...ThemeConfig.builtIn, ...custom];
-});
