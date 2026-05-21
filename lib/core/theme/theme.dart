@@ -1,41 +1,53 @@
 import 'package:flutter/material.dart';
 
-/// [ThemeConfig] definition.
 class ThemeConfig {
-  /// Constructor for [ThemeConfig].
-  const ThemeConfig({required this.seedColor, this.surfaceColor});
+  const ThemeConfig({required this.seedColor, this.brightness = .dark});
 
-  /// Creates an instance of [ThemeConfig] from a JSON map.
   factory ThemeConfig.fromJson(Map<String, dynamic> json) {
     return ThemeConfig(
-      seedColor: Color(json['seed'] as int),
-      surfaceColor: json['surface'] != null
-          ? Color(json['surface'] as int)
-          : null,
+      seedColor: Color(json['seedColor'] as int),
+      brightness: json['brightness'] == 'light' ? .light : .dark,
     );
   }
 
-  /// The [seedColor] field.
   final Color seedColor;
 
-  /// The [surfaceColor] field.
-  final Color? surfaceColor;
+  final Brightness brightness;
 
-  /// The [builtIn] field.
   static const builtIn = [
-    ThemeConfig(seedColor: Color(0xFF2196F3)),
-    ThemeConfig(seedColor: Color(0xFF4CAF50)),
-    ThemeConfig(seedColor: Color(0xFFFF9800)),
-    ThemeConfig(seedColor: Color(0xFFE91E63)),
-    ThemeConfig(seedColor: Color(0xFF9C27B0)),
-    ThemeConfig(seedColor: Color(0xFF00BCD4)),
-    ThemeConfig(seedColor: Color(0xFF795548), surfaceColor: Color(0xFFF5F0EB)),
-    ThemeConfig(seedColor: Color(0xFF607D8B), surfaceColor: Color(0xFFECEFF1)),
+    // Lavender Dusk
+    ThemeConfig(seedColor: Color(0xFF7C5CBF)),
+
+    // Sage Mist
+    ThemeConfig(seedColor: Color(0xFF5A8A6A)),
+
+    // Dusty Rose
+    ThemeConfig(seedColor: Color(0xFFA8606B), brightness: .light),
+
+    // Slate Blue
+    ThemeConfig(seedColor: Color(0xFF4A6FA5)),
+
+    // Warm Amber
+    ThemeConfig(seedColor: Color(0xFFB07840), brightness: .light),
+
+    // Seafoam
+    ThemeConfig(seedColor: Color(0xFF4A8A80)),
+
+    // Mauve
+    ThemeConfig(seedColor: Color(0xFF8A5A7C)),
+
+    // Steel Teal
+    ThemeConfig(seedColor: Color(0xFF4A7A8A)),
+
+    // Terracotta
+    ThemeConfig(seedColor: Color(0xFF9A5A45), brightness: .light),
+
+    // Periwinkle
+    ThemeConfig(seedColor: Color(0xFF5A6AAF)),
   ];
 
-  /// A public member.
   Map<String, dynamic> toJson() => {
-    'seed': seedColor.toARGB32(),
-    'surface': surfaceColor?.toARGB32(),
+    'seedColor': seedColor.toARGB32(),
+    'brightness': brightness.name,
   };
 }

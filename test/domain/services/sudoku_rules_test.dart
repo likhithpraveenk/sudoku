@@ -17,11 +17,11 @@ void main() {
       expect(peersResult.contains(cell), isFalse);
 
       for (var col = 1; col < 9; col++) {
-        expect(peersResult.contains(col), isTrue); // row 0, col
+        expect(peersResult.contains(col), isTrue);
       }
 
       for (var row = 1; row < 9; row++) {
-        expect(peersResult.contains(row * 9), isTrue); // row, col 0
+        expect(peersResult.contains(row * 9), isTrue);
       }
 
       for (var row = 0; row < 3; row++) {
@@ -61,11 +61,7 @@ void main() {
       final puzzleGrid = TestGrids.simplePuzzle();
       final solutionGrid = TestGrids.simpleSolution();
 
-      final puzzle = Puzzle(
-        grid: puzzleGrid,
-        solution: solutionGrid,
-        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
-      );
+      final puzzle = Puzzle(given: puzzleGrid, solution: solutionGrid);
       final initialState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
 
       const cell = 2;
@@ -83,15 +79,15 @@ void main() {
 
       final incorrectState = applyDigit(newState, 3, 9);
 
-      expect(incorrectState.errorCells.contains(3), isTrue);
+      expect(incorrectState.grid.valueAt(3), 9);
 
-      expect(incorrectState.mistakeCount, 1);
+      expect(incorrectState.notes[3].isEmpty, isTrue);
 
       final correctedState = applyDigit(incorrectState, 3, 6);
 
-      expect(correctedState.errorCells.contains(3), isFalse);
+      expect(correctedState.grid.valueAt(3), 6);
 
-      expect(correctedState.mistakeCount, 1);
+      expect(correctedState.notes[3].isEmpty, isTrue);
     });
   });
 }

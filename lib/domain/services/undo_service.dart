@@ -1,10 +1,8 @@
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
-/// The [canUndo] method.
 bool canUndo(GameState state) => state.history.isNotEmpty;
 
-/// The [popUndo] method.
 GameState popUndo(GameState state) {
   if (!canUndo(state)) return state;
 
@@ -19,12 +17,7 @@ GameState popUndo(GameState state) {
       });
       final grid = state.grid.clone()
         ..setValue(action.cellIndex, action.previousValue);
-      return state.copyWith(
-        grid: grid,
-        notes: newNotes,
-        history: remaining,
-        errorCells: Set.from(state.errorCells)..remove(action.cellIndex),
-      );
+      return state.copyWith(grid: grid, notes: newNotes, history: remaining);
     }(),
     PencilAction() => () {
       final newNotes = state.notes.map(Set<int>.from).toList();

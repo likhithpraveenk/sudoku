@@ -1,116 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/game_state.dart';
-import 'package:sudoku/domain/models/input_method.dart';
+import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 
-/// The gameplay action row positioned above the digit pad on the Game Screen.
-///
-/// This row provides players with a series of quick-access action buttons to:
-/// * **Undo**: Revert the last move (digit placement, note toggle, or erase).
-/// * **Erase**: Clear the value or notes of the selected cell.
-/// * **Pencil**: Toggle the input mode between direct digits and pencil notes.
-/// * **Hint**: Query the solver engine for a smart logical hint and apply it.
-/// * **Check**: Run validation and flag incorrect entries on the board.
-/// * **AutoNotes**: Pre-fill all empty cells with valid pencil candidates.
 class ActionRow extends ConsumerWidget {
-  /// Creates the action control row.
-  const ActionRow({required this.state, super.key});
-
-  /// The active state of the current game.
-  final GameState state;
+  const ActionRow({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(gameProvider.notifier);
-    final isPencil = state.inputMode == InputMode.pencil;
+    final board = ref.watch(boardProvider);
+    final boardNotifier = ref.read(boardProvider.notifier);
+    final gameNotifier = ref.read(gameProvider.notifier);
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      spacing: 6,
+      mainAxisAlignment: .spaceEvenly,
       children: [
         _ActionButton(
-          icon: Icons.undo_rounded,
-          label: 'Undo',
-          onTap: notifier.canUndo ? notifier.undo : null,
-        ),
-        _ActionButton(
-          icon: Icons.backspace_outlined,
-          label: 'Erase',
-          onTap: state.selectedCell != null
-              ? () => notifier.erase(state.selectedCell!)
-              : null,
-        ),
-        _ActionButton(
-          icon: Icons.edit_outlined,
-          label: 'Pencil',
-          active: isPencil,
-          onTap: notifier.toggleInputMode,
-        ),
-        _ActionButton(
-          icon: Icons.lightbulb_outline_rounded,
-          label: 'Hint',
+          icon: Icons.refresh_rounded,
           onTap: () {
-            notifier.applyHint((message) {
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            });
+            // TODO: alert dialog to restart game
           },
         ),
         _ActionButton(
-          icon: Icons.check_circle_outline_rounded,
-          label: 'Check',
-          onTap: notifier.runValidation,
+          icon: Icons.lightbulb_outline_rounded,
+          onTap: () => _showMoreSheet(context, gameNotifier),
         ),
         _ActionButton(
-          icon: Icons.autorenew,
-          label: 'AutoNotes',
-          onTap: notifier.applyAutoNotes,
+          icon: Icons.edit_outlined,
+          active: board.inputMode == .pencil,
+          onTap: boardNotifier.toggleInputMode,
+        ),
+        _ActionButton(
+          icon: Icons.undo_rounded,
+          onTap: gameNotifier.canUndo ? gameNotifier.undo : null,
         ),
       ],
+    );
+  }
+
+  Future<void> _showMoreSheet(
+    BuildContext context,
+    GameNotifier notifier,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.lightbulb_outline_rounded),
+              title: const Text('Hint'),
+              onTap: () {
+                Navigator.pop(ctx);
+                notifier.hint();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle_outline_rounded),
+              title: const Text('Check'),
+              onTap: () {
+                Navigator.pop(ctx);
+                notifier.runValidation();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.autorenew),
+              title: const Text('Auto Notes'),
+              onTap: () {
+                Navigator.pop(ctx);
+                notifier.applyAutoNotes();
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    this.onTap,
-    this.active = false,
-  });
+  const _ActionButton({required this.icon, this.onTap, this.active = false});
 
   final IconData icon;
-  final String label;
   final VoidCallback? onTap;
   final bool active;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final color = onTap == null
-        ? cs.onSurface.withValues(alpha: 0.3)
+        ? scheme.onSurface.withValues(alpha: 0.3)
         : active
-        ? cs.primary
-        : cs.onSurface;
+        ? scheme.surface
+        : scheme.onSurface;
 
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 60,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 26),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 11, color: color)),
-          ],
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: active ? scheme.primary : Colors.transparent,
+          borderRadius: .circular(6),
         ),
+        child: Icon(icon, color: color, size: 26),
       ),
     );
   }

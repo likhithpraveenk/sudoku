@@ -1,69 +1,117 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/shared/breakpoints.dart';
 import 'package:sudoku/presentation/widgets/action_row.dart';
 import 'package:sudoku/presentation/widgets/digit_pad.dart';
+import 'package:sudoku/presentation/widgets/game_layout.dart';
 import 'package:sudoku/presentation/widgets/grid_widget.dart';
 import 'package:sudoku/presentation/widgets/solved_overlay.dart';
+import 'package:sudoku/presentation/widgets/theme_selector.dart';
+import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 
-/// The main active gameplay screen of the Sudoku application.
-///
-/// This screen acts as the shell that coordinates the active game. It handles
-/// loading and error states of the [gameProvider], presents the current
-/// mistake count in the AppBar, and renders the solved state via the
-/// [SolvedOverlay] or the interactive board via [_GameBody].
 class GameScreen extends ConsumerWidget {
-  /// Creates a new gameplay screen.
   const GameScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(gameProvider);
+    final gameAsync = ref.watch(gameProvider);
+    final showTimer = ref.watch(settingsServiceProvider).showTimer;
+    final game = gameAsync.value;
+
+    final board = ref.watch(boardProvider);
+    final boardNotifier = ref.read(boardProvider.notifier);
+    final gameNotifier = ref.read(gameProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
-        title: async.maybeWhen(
-          data: (s) => Text(
-            _difficultyLabel(s.difficulty),
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          orElse: () => const Text('Sudoku'),
-        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: (showTimer && game != null && !game.puzzleComplete)
+            ? Text(
+                _formatTime(game.elapsed),
+                style: Theme.of(context).textTheme.labelLarge,
+              )
+            : null,
         centerTitle: true,
-        actions: [
-          async.maybeWhen(
-            data: (s) => Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Center(
-                child: Text(
-                  'Mistakes: ${s.mistakeCount}',
-                  style: const TextStyle(fontSize: 13),
-                ),
-              ),
-            ),
-            orElse: () => const SizedBox.shrink(),
-          ),
-        ],
+        actions: const [ThemeSelector()],
       ),
-      body: async.when(
+      body: gameAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
-        data: (state) => state.isSolved
-            ? SolvedOverlay(state: state)
-            : _GameBody(state: state),
+        data: (game) {
+          if (game == null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: .center,
+                children: [
+                  const Text('No active game'),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: () {
+                      gameNotifier.stopTimer();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Start New Game'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return Focus(
+            autofocus: true,
+            onKeyEvent: (node, event) {
+              if (event is! KeyDownEvent) return .ignored;
+              final key = event.logicalKey;
+              switch (key) {
+                case .arrowLeft:
+                  boardNotifier.selectCell((board.selectedCell ?? 0) - 1);
+                  return .handled;
+                case .arrowRight:
+                  boardNotifier.selectCell((board.selectedCell ?? 0) + 1);
+                  return .handled;
+                case .arrowUp:
+                  boardNotifier.selectCell((board.selectedCell ?? 0) - 9);
+                  return .handled;
+                case .arrowDown:
+                  boardNotifier.selectCell((board.selectedCell ?? 0) + 9);
+                  return .handled;
+                case .backspace || .delete:
+                  gameNotifier.erase();
+                  return .handled;
+                default:
+              }
+              if (key.keyLabel.length == 1) {
+                final d = int.tryParse(key.keyLabel);
+                if (d != null && d >= 1 && d <= 9) {
+                  boardNotifier.selectDigit(d);
+                  return .handled;
+                }
+              }
+              if (key.keyLabel.toLowerCase() == 'p') {
+                boardNotifier.toggleInputMode();
+                return .handled;
+              }
+              return .ignored;
+            },
+            child: game.puzzleComplete
+                ? SolvedOverlay(state: game, onBack: gameNotifier.stopTimer)
+                : _GameBody(state: game),
+          );
+        },
       ),
     );
   }
 
-  String _difficultyLabel(Difficulty d) => switch (d) {
-    Difficulty.easy => 'Easy',
-    Difficulty.medium => 'Medium',
-    Difficulty.hard => 'Hard',
-    Difficulty.expert => 'Expert',
-  };
+  String _formatTime(Duration d) {
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
 }
 
 class _GameBody extends ConsumerWidget {
@@ -73,56 +121,28 @@ class _GameBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isExpanded = context.isExpanded;
+    final svc = ref.watch(settingsServiceProvider);
 
-    final grid = GridWidget(state: state);
-    final controls = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ActionRow(state: state),
-        const SizedBox(height: 12),
-        DigitPad(state: state),
-      ],
+    final grid = GridWidget(gameState: state);
+    const action = ActionRow();
+    final digits = DigitPad(state: state);
+
+    final base = isExpanded
+        ? GameLayoutParams.desktop
+        : GameLayoutParams.mobile;
+    final params = base.copyWith(
+      gridWidth: svc.gridWidth,
+      horizontalSpacing: svc.horizontalSpacing,
+      verticalSpacing: svc.verticalSpacing,
+      placement: svc.placement,
     );
 
-    if (isExpanded) {
-      return SafeArea(
-        child: Row(
-          children: [
-            Expanded(child: Center(child: grid)),
-            SizedBox(
-              width: 320,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 24,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ActionRow(state: state),
-                    const SizedBox(height: 24),
-                    DigitPad(state: state),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            grid,
-            const SizedBox(height: 16),
-            controls,
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+    return GameLayout(
+      params: params,
+      grid: grid,
+      actionRow: action,
+      digitPad: digits,
+      isExpanded: isExpanded,
     );
   }
 }

@@ -1,18 +1,16 @@
 import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/engine/techniques/sudoku_technique.dart';
+import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [HiddenTriple] definition.
 class HiddenTriple implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
     for (final unit in kGridUnits) {
-      // Precompute for each digit the set of cells in the unit where it
-      // is a candidate
       final digitToCells = <int, Set<int>>{};
       for (var digit = 1; digit <= 9; digit++) {
         final cells = <int>{};
@@ -24,7 +22,6 @@ class HiddenTriple implements SudokuTechnique {
         digitToCells[digit] = cells;
       }
 
-      // Iterate over all combinations of three distinct digits
       for (var d1 = 1; d1 <= 7; d1++) {
         for (var d2 = d1 + 1; d2 <= 8; d2++) {
           for (var d3 = d2 + 1; d3 <= 9; d3++) {
@@ -39,10 +36,6 @@ class HiddenTriple implements SudokuTechnique {
               ..addAll(s2)
               ..addAll(s3);
             if (union.length == 3) {
-              // Found a hidden triple: digits d1,d2,d3 are confined to
-              // exactly three cells (union).
-              // Now, for each cell in the union, remove candidates that
-              // are not d1,d2,d3.
               final toRemoveDigits = <int>[];
               for (var digit = 1; digit <= 9; digit++) {
                 if (digit != d1 && digit != d2 && digit != d3) {

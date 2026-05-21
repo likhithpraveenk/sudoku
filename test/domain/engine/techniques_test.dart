@@ -39,101 +39,82 @@ void main() {
     });
 
     group('HiddenTriple', () {
-      test(
-        'ignores units where one of the target digits is already solved '
-        '(bug fix validation)',
-        () {
-          final grid = SudokuGrid()..setValue(8, 1);
+      test('ignores units where one of the target digits is already solved '
+          '(bug fix validation)', () {
+        final grid = SudokuGrid()..setValue(8, 1);
 
-          // Configure index 0 with candidates {2, 4}
-          for (var d = 1; d <= 9; d++) {
-            if (grid.isCandidate(0, d)) grid.removeCandidate(0, d);
-          }
-          grid
-            ..addCandidate(0, 2)
-            ..addCandidate(0, 4);
+        for (var d = 1; d <= 9; d++) {
+          if (grid.isCandidate(0, d)) grid.removeCandidate(0, d);
+        }
+        grid
+          ..addCandidate(0, 2)
+          ..addCandidate(0, 4);
 
-          // Configure index 1 with candidates {3, 5}
-          for (var d = 1; d <= 9; d++) {
-            if (grid.isCandidate(1, d)) grid.removeCandidate(1, d);
-          }
-          grid
-            ..addCandidate(1, 3)
-            ..addCandidate(1, 5);
+        for (var d = 1; d <= 9; d++) {
+          if (grid.isCandidate(1, d)) grid.removeCandidate(1, d);
+        }
+        grid
+          ..addCandidate(1, 3)
+          ..addCandidate(1, 5);
 
-          // Configure index 2 with candidates {2, 3, 6}
-          for (var d = 1; d <= 9; d++) {
-            if (grid.isCandidate(2, d)) grid.removeCandidate(2, d);
-          }
-          grid
-            ..addCandidate(2, 2)
-            ..addCandidate(2, 3)
-            ..addCandidate(2, 6);
+        for (var d = 1; d <= 9; d++) {
+          if (grid.isCandidate(2, d)) grid.removeCandidate(2, d);
+        }
+        grid
+          ..addCandidate(2, 2)
+          ..addCandidate(2, 3)
+          ..addCandidate(2, 6);
 
-          // Ensure indices 3..7 do not contain candidates 2 or 3
-          for (var i = 3; i < 8; i++) {
-            if (grid.isCandidate(i, 2)) grid.removeCandidate(i, 2);
-            if (grid.isCandidate(i, 3)) grid.removeCandidate(i, 3);
-          }
+        for (var i = 3; i < 8; i++) {
+          if (grid.isCandidate(i, 2)) grid.removeCandidate(i, 2);
+          if (grid.isCandidate(i, 3)) grid.removeCandidate(i, 3);
+        }
 
-          final hiddenTriple = HiddenTriple();
+        final hiddenTriple = HiddenTriple();
 
-          // Before our fix, this would have incorrectly detected a hidden
-          // triple {1, 2, 3} on {0, 1, 2} and eliminated 4, 5, 6.
-          // With the fix, it must return empty.
-          expect(hiddenTriple.getHints(grid), isEmpty);
-        },
-      );
+        expect(hiddenTriple.getHints(grid), isEmpty);
+      });
 
-      test(
-        'correctly identifies a valid hidden triple and eliminates '
-        'other candidates',
-        () {
-          final grid = SudokuGrid();
+      test('correctly identifies a valid hidden triple and eliminates '
+          'other candidates', () {
+        final grid = SudokuGrid();
 
-          // Cell 0: candidates {1, 2, 4}
-          for (var d = 1; d <= 9; d++) {
-            if (grid.isCandidate(0, d)) grid.removeCandidate(0, d);
-          }
-          grid
-            ..addCandidate(0, 1)
-            ..addCandidate(0, 2)
-            ..addCandidate(0, 4);
+        for (var d = 1; d <= 9; d++) {
+          if (grid.isCandidate(0, d)) grid.removeCandidate(0, d);
+        }
+        grid
+          ..addCandidate(0, 1)
+          ..addCandidate(0, 2)
+          ..addCandidate(0, 4);
 
-          // Cell 1: candidates {2, 3, 5}
-          for (var d = 1; d <= 9; d++) {
-            if (grid.isCandidate(1, d)) grid.removeCandidate(1, d);
-          }
-          grid
-            ..addCandidate(1, 2)
-            ..addCandidate(1, 3)
-            ..addCandidate(1, 5);
+        for (var d = 1; d <= 9; d++) {
+          if (grid.isCandidate(1, d)) grid.removeCandidate(1, d);
+        }
+        grid
+          ..addCandidate(1, 2)
+          ..addCandidate(1, 3)
+          ..addCandidate(1, 5);
 
-          // Cell 2: candidates {1, 3, 6}
-          for (var d = 1; d <= 9; d++) {
-            if (grid.isCandidate(2, d)) grid.removeCandidate(2, d);
-          }
-          grid
-            ..addCandidate(2, 1)
-            ..addCandidate(2, 3)
-            ..addCandidate(2, 6);
+        for (var d = 1; d <= 9; d++) {
+          if (grid.isCandidate(2, d)) grid.removeCandidate(2, d);
+        }
+        grid
+          ..addCandidate(2, 1)
+          ..addCandidate(2, 3)
+          ..addCandidate(2, 6);
 
-          // Ensure indices 3..8 in Row 0 do not contain candidates 1, 2, or 3
-          for (var i = 3; i < 9; i++) {
-            if (grid.isCandidate(i, 1)) grid.removeCandidate(i, 1);
-            if (grid.isCandidate(i, 2)) grid.removeCandidate(i, 2);
-            if (grid.isCandidate(i, 3)) grid.removeCandidate(i, 3);
-          }
+        for (var i = 3; i < 9; i++) {
+          if (grid.isCandidate(i, 1)) grid.removeCandidate(i, 1);
+          if (grid.isCandidate(i, 2)) grid.removeCandidate(i, 2);
+          if (grid.isCandidate(i, 3)) grid.removeCandidate(i, 3);
+        }
 
-          final hiddenTriple = HiddenTriple();
-          final hints = hiddenTriple.getHints(grid);
+        final hiddenTriple = HiddenTriple();
+        final hints = hiddenTriple.getHints(grid);
 
-          // Must successfully find a hidden triple and return an
-          // elimination hint (removing 4, 5, or 6)
-          expect(hints, isNotEmpty);
-          expect(hints.first.isPlacement(), isFalse);
-        },
-      );
+        expect(hints, isNotEmpty);
+        expect(hints.first.isPlacement(), isFalse);
+      });
     });
   });
 }

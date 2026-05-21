@@ -1,12 +1,12 @@
 import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/engine/techniques/sudoku_technique.dart';
+import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [NakedTriple] definition.
 class NakedTriple implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
@@ -15,7 +15,7 @@ class NakedTriple implements SudokuTechnique {
       for (final i in unit) {
         if (grid.valueAt(i) == 0) unsolved.add(i);
       }
-      // Check every subset of 3 unsolved cells
+
       for (var a = 0; a < unsolved.length - 2; a++) {
         final ia = unsolved[a];
         final ca = grid.getCandidates(ia).toSet();
@@ -30,8 +30,6 @@ class NakedTriple implements SudokuTechnique {
             if (cc.length > 3) continue;
             final union = ca.union(cb).union(cc);
             if (union.length == 3) {
-              // Each cell's candidates must be subset of union (already
-              // true by construction)
               for (final i in unsolved) {
                 if (i == ia || i == ib || i == ic) continue;
                 final toRemove = union.intersection(

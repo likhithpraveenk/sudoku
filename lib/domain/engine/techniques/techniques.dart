@@ -17,7 +17,6 @@ import 'package:sudoku/domain/engine/techniques/x_wing.dart';
 import 'package:sudoku/domain/engine/techniques/x_y_wing.dart';
 import 'package:sudoku/domain/engine/techniques/xyz_wing.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
-import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 export 'package:sudoku/domain/engine/techniques/claiming_pairs.dart';
 export 'package:sudoku/domain/engine/techniques/hidden_pair.dart';
@@ -38,7 +37,29 @@ export 'package:sudoku/domain/engine/techniques/x_wing.dart';
 export 'package:sudoku/domain/engine/techniques/x_y_wing.dart';
 export 'package:sudoku/domain/engine/techniques/xyz_wing.dart';
 
-/// A public member.
+List<SudokuTechnique> get allTechniques {
+  final techniques = [
+    NakedSingle(),
+    HiddenSingle(),
+    PointingPairs(),
+    ClaimingPairs(),
+    NakedPair(),
+    HiddenPair(),
+    NakedTriple(),
+    HiddenTriple(),
+    XWing(),
+    XYWing(),
+    Swordfish(),
+    NakedQuad(),
+    SimpleColoring(),
+    TurbotFish(),
+    XYZWing(),
+    Jellyfish(),
+    HiddenQuad(),
+  ]..sort((a, b) => a.level.value.compareTo(b.level.value));
+  return techniques;
+}
+
 List<SudokuTechnique> techniquesUpTo(Difficulty d) => switch (d) {
   .easy => [NakedSingle(), HiddenSingle()],
   .medium => [
@@ -82,21 +103,3 @@ List<SudokuTechnique> techniquesUpTo(Difficulty d) => switch (d) {
     TurbotFish(),
   ],
 };
-
-/// The [canSolveHumanly] method.
-bool canSolveHumanly(SudokuGrid grid, List<SudokuTechnique> techniques) {
-  final gridCopy = grid.clone();
-  while (true) {
-    if (gridCopy.isSolved()) return true;
-    var progress = false;
-    for (final technique in techniques) {
-      final hints = technique.getHints(gridCopy);
-      if (hints.isNotEmpty) {
-        hints[0].apply(gridCopy);
-        progress = true;
-        break;
-      }
-    }
-    if (!progress) return false;
-  }
-}

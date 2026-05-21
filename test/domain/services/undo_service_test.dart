@@ -10,11 +10,7 @@ void main() {
   group('UndoService', () {
     test('canUndo returns false for empty history', () {
       final state = GameState.newGame(
-        puzzle: Puzzle(
-          grid: TestGrids.empty(),
-          solution: TestGrids.empty(),
-          givenMask: List.generate(81, (_) => false),
-        ),
+        puzzle: Puzzle(given: TestGrids.empty(), solution: TestGrids.empty()),
         difficulty: .easy,
       );
       expect(canUndo(state), isFalse);
@@ -24,9 +20,8 @@ void main() {
       final state =
           GameState.newGame(
             puzzle: Puzzle(
-              grid: TestGrids.empty(),
+              given: TestGrids.empty(),
               solution: TestGrids.empty(),
-              givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
@@ -44,11 +39,7 @@ void main() {
 
     test('pop does nothing when history is empty', () {
       final state = GameState.newGame(
-        puzzle: Puzzle(
-          grid: TestGrids.empty(),
-          solution: TestGrids.empty(),
-          givenMask: List.generate(81, (_) => false),
-        ),
+        puzzle: Puzzle(given: TestGrids.empty(), solution: TestGrids.empty()),
         difficulty: .easy,
       );
       final result = popUndo(state);
@@ -60,9 +51,8 @@ void main() {
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              grid: TestGrids.empty(),
+              given: TestGrids.empty(),
               solution: TestGrids.empty(),
-              givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
@@ -87,9 +77,8 @@ void main() {
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              grid: TestGrids.empty(),
+              given: TestGrids.empty(),
               solution: TestGrids.empty(),
-              givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
@@ -114,9 +103,8 @@ void main() {
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              grid: TestGrids.empty(),
+              given: TestGrids.empty(),
               solution: TestGrids.empty(),
-              givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(
@@ -144,9 +132,8 @@ void main() {
       final initialState =
           GameState.newGame(
             puzzle: Puzzle(
-              grid: TestGrids.empty(),
+              given: TestGrids.empty(),
               solution: TestGrids.empty(),
-              givenMask: List.generate(81, (_) => false),
             ),
             difficulty: .easy,
           ).copyWith(

@@ -12,11 +12,7 @@ void main() {
       final puzzleGrid = TestGrids.simplePuzzle();
       final solutionGrid = TestGrids.simpleSolution();
 
-      final puzzle = Puzzle(
-        grid: puzzleGrid,
-        solution: solutionGrid,
-        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
-      );
+      final puzzle = Puzzle(given: puzzleGrid, solution: solutionGrid);
       final initialState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
       const cell = 2;
 
@@ -39,11 +35,7 @@ void main() {
       final puzzleGrid = TestGrids.simplePuzzle();
       final solutionGrid = TestGrids.simpleSolution();
 
-      final puzzle = Puzzle(
-        grid: puzzleGrid,
-        solution: solutionGrid,
-        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
-      );
+      final puzzle = Puzzle(given: puzzleGrid, solution: solutionGrid);
       final initialState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
       const givenCell = 0;
       final stateAfterToggle = toggleNote(initialState, givenCell, 4);
@@ -51,32 +43,11 @@ void main() {
       expect(stateAfterToggle, equals(initialState));
     });
 
-    test('toggle does nothing for revealed cells', () {
-      final puzzleGrid = TestGrids.simplePuzzle();
-      final solutionGrid = TestGrids.simpleSolution();
-      final puzzle = Puzzle(
-        grid: puzzleGrid,
-        solution: solutionGrid,
-        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
-      );
-
-      const revealedCell = 2;
-      final baseState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
-      final stateWithReveal = baseState.copyWith(revealedCells: {revealedCell});
-
-      final stateAfterToggle = toggleNote(stateWithReveal, revealedCell, 4);
-      expect(stateAfterToggle, equals(stateWithReveal));
-    });
-
     test('autoFill computes correct pencil marks', () {
       final puzzleGrid = TestGrids.simplePuzzle();
       final solutionGrid = TestGrids.simpleSolution();
 
-      final puzzle = Puzzle(
-        grid: puzzleGrid,
-        solution: solutionGrid,
-        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
-      );
+      final puzzle = Puzzle(given: puzzleGrid, solution: solutionGrid);
       final initialState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
       final stateAfterAutoFill = autoFillNotes(initialState);
 
@@ -98,11 +69,7 @@ void main() {
       final puzzleGrid = TestGrids.simplePuzzle();
       final solutionGrid = TestGrids.simpleSolution();
 
-      final puzzle = Puzzle(
-        grid: puzzleGrid,
-        solution: solutionGrid,
-        givenMask: List.generate(81, (i) => puzzleGrid.valueAt(i) != 0),
-      );
+      final puzzle = Puzzle(given: puzzleGrid, solution: solutionGrid);
       final initialState = GameState.newGame(puzzle: puzzle, difficulty: .easy);
 
       const cell = 2;

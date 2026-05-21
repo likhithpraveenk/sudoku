@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sudoku/domain/engine/backtracker.dart';
+import 'package:sudoku/domain/engine/has_unique_solution.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 import '../../helpers/sudoku_grids.dart';
 
 void main() {
-  group('Backtracker Solver', () {
+  group('Sudoku Solver', () {
     test('solves a simple puzzle', () {
       final grid = TestGrids.simplePuzzle();
       final solved = solveGrid(SudokuGrid(values: grid.values));
@@ -27,17 +27,11 @@ void main() {
       expect(hasUniqueSolution(SudokuGrid(values: grid.values)), isTrue);
     });
 
-    test(
-      'hasUniqueSolution returns false for a puzzle with '
-      'more than one solution',
-      () {
-        final emptyGrid = SudokuGrid();
+    test('hasUniqueSolution returns false for a puzzle with '
+        'more than one solution', () {
+      final emptyGrid = SudokuGrid();
 
-        expect(
-          hasUniqueSolution(SudokuGrid(values: emptyGrid.values)),
-          isFalse,
-        );
-      },
-    );
+      expect(hasUniqueSolution(SudokuGrid(values: emptyGrid.values)), isFalse);
+    });
   });
 }

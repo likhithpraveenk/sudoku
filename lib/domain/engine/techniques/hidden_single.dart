@@ -4,10 +4,9 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [HiddenSingle] definition.
 class HiddenSingle implements SudokuTechnique {
   @override
-  int get level => 1;
+  Difficulty get level => .easy;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {

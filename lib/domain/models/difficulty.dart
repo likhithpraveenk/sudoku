@@ -1,14 +1,34 @@
-/// Represents the difficulty levels of a Sudoku puzzle.
 enum Difficulty {
-  /// Easy difficulty level.
-  easy,
+  easy(1, 'Easy'),
+  medium(2, 'Medium'),
+  hard(3, 'Hard'),
+  expert(4, 'Expert');
 
-  /// Medium difficulty level.
-  medium,
+  final int value;
+  final String displayName;
 
-  /// Hard difficulty level.
-  hard,
+  const Difficulty(this.value, this.displayName);
 
-  /// Expert difficulty level.
-  expert,
+  static Difficulty fromValue(int value) {
+    return Difficulty.values.firstWhere(
+      (d) => d.value == value,
+      orElse: () => Difficulty.easy,
+    );
+  }
+
+  bool operator >(Difficulty other) {
+    return value > other.value;
+  }
+
+  bool operator >=(Difficulty other) {
+    return value >= other.value;
+  }
+
+  bool operator <(Difficulty other) {
+    return value < other.value;
+  }
+
+  bool operator <=(Difficulty other) {
+    return value <= other.value;
+  }
 }

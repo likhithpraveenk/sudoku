@@ -1,21 +1,12 @@
 import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// The [hasUniqueSolution] method.
 bool hasUniqueSolution(SudokuGrid grid) {
   final cells = List<int>.from(grid.values);
   final candidates = _buildCandidates(cells);
   return _search(cells, candidates, limit: 2) == 1;
 }
 
-/// The [countSolutions] method.
-int countSolutions(SudokuGrid grid, {int limit = 2}) {
-  final cells = List<int>.from(grid.values);
-  final candidates = _buildCandidates(cells);
-  return _search(cells, candidates, limit: limit);
-}
-
-/// A public member.
 SudokuGrid? solveGrid(SudokuGrid grid) {
   final cells = List<int>.from(grid.values);
   final candidates = _buildCandidates(cells);

@@ -3,14 +3,12 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [Jellyfish] definition.
 class Jellyfish implements SudokuTechnique {
   @override
-  int get level => 4;
+  Difficulty get level => .expert;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
-    // Row-based Jellyfish
     for (var digit = 1; digit <= 9; digit++) {
       final rowCandidates = <int, List<int>>{};
       for (var row = 0; row < 9; row++) {
@@ -44,9 +42,6 @@ class Jellyfish implements SudokuTechnique {
                   ..addAll(rowCandidates[r4]!);
 
                 if (unionCols.length == 4) {
-                  // Found a Jellyfish!
-                  // Eliminate digit from target columns outside of
-                  // r1, r2, r3, r4
                   for (final col in unionCols) {
                     for (var row = 0; row < 9; row++) {
                       if (row != r1 && row != r2 && row != r3 && row != r4) {
@@ -68,7 +63,6 @@ class Jellyfish implements SudokuTechnique {
       }
     }
 
-    // Column-based Jellyfish
     for (var digit = 1; digit <= 9; digit++) {
       final colCandidates = <int, List<int>>{};
       for (var col = 0; col < 9; col++) {
@@ -102,8 +96,6 @@ class Jellyfish implements SudokuTechnique {
                   ..addAll(colCandidates[c4]!);
 
                 if (unionRows.length == 4) {
-                  // Found a Jellyfish!
-                  // Eliminate digit from target rows outside of c1, c2, c3, c4
                   for (final row in unionRows) {
                     for (var col = 0; col < 9; col++) {
                       if (col != c1 && col != c2 && col != c3 && col != c4) {

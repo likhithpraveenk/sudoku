@@ -1,92 +1,107 @@
 import 'package:flutter/material.dart';
 
-/// A mini 3-row grid used to display pencil candidates (notes) inside a cell.
-///
-/// This widget dynamically aligns and formats the candidate notes based on the
-/// total count to prevent overlapping and maintain a clean grid visual. It
-/// divides candidates into up to three rows (top, middle, bottom) and scales
-/// font size proportionally based on the cell size.
 class NotesGrid extends StatelessWidget {
-  /// Creates a notes grid to render candidates inside a cell.
-  const NotesGrid({required this.notes, required this.cellSize, super.key});
+  const NotesGrid({
+    required this.notes,
+    required this.cellSize,
+    super.key,
+    this.hasNoteOfSameDigit = false,
+  });
 
-  /// The set of pencil notes/candidates active inside this cell.
   final Set<int> notes;
 
-  /// The size (width and height) of the parent cell container.
   final double cellSize;
+
+  final bool hasNoteOfSameDigit;
 
   @override
   Widget build(BuildContext context) {
-    if (notes.isEmpty) return const SizedBox.shrink();
-
-    final cs = Theme.of(context).colorScheme;
-    final color = cs.primary;
-    final fontSize = cellSize * 0.21;
-
-    final notesList = notes.toList()..sort();
-    final n = notesList.length;
-
-    var middleCount = 0;
-    var topCount = 0;
-
-    if (n == 3) {
-      middleCount = 1;
-    } else if (n == 4) {
-      middleCount = 2;
-    } else if (n == 5) {
-      middleCount = 3;
-    } else if (n == 6) {
-      middleCount = 4;
-    } else if (n == 7) {
-      middleCount = 4;
-      topCount = 1;
-    } else if (n >= 8) {
-      middleCount = 4;
-      topCount = n - 6;
+    if (notes.isEmpty) {
+      return const SizedBox.shrink();
     }
 
-    final topRow = notesList.sublist(0, topCount);
-    final middleRow = notesList.sublist(topCount, topCount + middleCount);
-    final bottomRow = notesList.sublist(topCount + middleCount);
+    final cs = Theme.of(context).colorScheme;
+
+    final color = hasNoteOfSameDigit ? cs.surface : cs.onSurface;
+
+    final fontSize = cellSize * 0.2;
+
+    final digits = notes.toList()..sort();
+
+    final (top, middle, bottom) = _splitRows(digits);
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
+      mainAxisAlignment: .end,
       children: [
-        if (topRow.isNotEmpty) ...[
-          _buildRow(topRow, fontSize, color),
+        if (top.isNotEmpty) ...[
+          _NotesRow(digits: top, fontSize: fontSize, color: color),
           const SizedBox(height: 1),
         ],
-        if (middleRow.isNotEmpty) ...[
-          _buildRow(middleRow, fontSize, color),
+        if (middle.isNotEmpty) ...[
+          _NotesRow(digits: middle, fontSize: fontSize, color: color),
           const SizedBox(height: 1),
         ],
-        if (bottomRow.isNotEmpty) _buildRow(bottomRow, fontSize, color),
+        if (bottom.isNotEmpty)
+          _NotesRow(digits: bottom, fontSize: fontSize, color: color),
       ],
     );
   }
 
-  Widget _buildRow(List<int> digits, double fontSize, Color color) {
+  (List<int>, List<int>, List<int>) _splitRows(List<int> digits) {
+    final n = digits.length;
+
+    final (topCount, middleCount) = switch (n) {
+      <= 2 => (0, 0),
+      3 => (0, 1),
+      4 => (0, 2),
+      5 => (0, 3),
+      6 => (0, 4),
+      7 => (1, 4),
+      _ => (n - 6, 4),
+    };
+
+    final top = digits.sublist(0, topCount);
+
+    final middle = digits.sublist(topCount, topCount + middleCount);
+
+    final bottom = digits.sublist(topCount + middleCount);
+
+    return (top, middle, bottom);
+  }
+}
+
+class _NotesRow extends StatelessWidget {
+  const _NotesRow({
+    required this.digits,
+    required this.fontSize,
+    required this.color,
+  });
+
+  final List<int> digits;
+  final double fontSize;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
-      children: digits
-          .map(
-            (digit) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1.5),
-              child: Text(
-                '$digit',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
-                ),
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (final digit in digits)
+          Padding(
+            padding: const .symmetric(horizontal: 0.8),
+            child: Text(
+              '$digit',
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: .w500,
+                height: 1,
+                color: color,
               ),
             ),
-          )
-          .toList(),
+          ),
+      ],
     );
   }
 }

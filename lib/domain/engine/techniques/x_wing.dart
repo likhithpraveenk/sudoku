@@ -3,19 +3,12 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [XWing] definition.
 class XWing implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
-    // X-Wing: look for two rows (or two columns) that each have exactly two
-    // cells with a candidate digit, and these cells are in the same two
-    // columns (or rows). Then the digit can be eliminated from other cells
-    // in those columns (or rows).
-
-    // Check rows
     for (var digit = 1; digit <= 9; digit++) {
       final rowsWithTwo = <int>[];
       for (var row = 0; row < 9; row++) {
@@ -31,26 +24,20 @@ class XWing implements SudokuTechnique {
         }
         if (cols.length == 2) {
           rowsWithTwo.add(row);
-          // Store the columns for this row
-          // We'll use a map: row -> list of columns
-          // But we need to check pairs of rows
         }
       }
-      // Now check pairs of rows in rowsWithTwo
+
       for (var i = 0; i < rowsWithTwo.length; i++) {
         for (var j = i + 1; j < rowsWithTwo.length; j++) {
           final row1 = rowsWithTwo[i];
           final row2 = rowsWithTwo[j];
-          // Get the columns for row1 and row2
+
           final cols1 = _getColsForDigitInRow(grid, digit, row1);
           final cols2 = _getColsForDigitInRow(grid, digit, row2);
           if (cols1.length == 2 &&
               cols2.length == 2 &&
               cols1[0] == cols2[0] &&
               cols1[1] == cols2[1]) {
-            // Found an X-Wing on rows row1 and row2, columns cols1[0] and
-            // cols1[1]
-            // Remove digit from other cells in these two columns
             final col1 = cols1[0];
             final col2 = cols1[1];
             for (var row = 0; row < 9; row++) {
@@ -73,7 +60,6 @@ class XWing implements SudokuTechnique {
       }
     }
 
-    // Check columns (similar to rows)
     for (var digit = 1; digit <= 9; digit++) {
       final colsWithTwo = <int>[];
       for (var col = 0; col < 9; col++) {
@@ -101,9 +87,6 @@ class XWing implements SudokuTechnique {
               rows2.length == 2 &&
               rows1[0] == rows2[0] &&
               rows1[1] == rows2[1]) {
-            // Found an X-Wing on columns col1 and col2, rows rows1[0] and
-            // rows1[1]
-            // Remove digit from other cells in these two rows
             final row1 = rows1[0];
             final row2 = rows1[1];
             for (var col = 0; col < 9; col++) {

@@ -2,86 +2,128 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/shared/breakpoints.dart';
+import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 
-/// A row of digit buttons (1 through 9) used to input values or candidates
-/// onto the board.
-///
-/// This pad highlights the button corresponding to the currently active digit
-/// (either explicitly selected for digit-first entry, or matching the digit of
-/// the selected cell). When a button is pressed, it routes the command through
-/// the [GameNotifier] to update the selected cell or prime the global active
-/// digit.
 class DigitPad extends ConsumerWidget {
-  /// Creates a digit input pad.
   const DigitPad({required this.state, super.key});
 
-  /// The active state of the current game.
   final GameState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(gameProvider.notifier);
-    final selectedCell = state.selectedCell;
+    final board = ref.watch(boardProvider);
+    final gameNotifier = ref.read(gameProvider.notifier);
+    final boardNotifier = ref.watch(boardProvider.notifier);
+    final digitCounts = state.grid.digitCounts;
+    final showRemaining = ref.watch(settingsServiceProvider).showRemaining;
+
+    final buttons =
+        List.generate(9, (i) {
+          final digit = i + 1;
+          final isActive = board.selectedDigit == digit;
+          final count = digitCounts[digit] ?? 0;
+
+          return _DigitButton(
+            digit: '$digit',
+            active: isActive,
+            count: count,
+            showCount: showRemaining,
+            onTap: () {
+              if (board.selectedCell != null) {
+                gameNotifier.inputDigit(board.selectedCell!, digit);
+              } else {
+                boardNotifier.selectDigit(digit);
+              }
+            },
+          );
+        })..add(
+          _DigitButton(
+            digit: 'X',
+            active: false,
+            count: 9,
+            showCount: showRemaining,
+            onTap: gameNotifier.erase,
+          ),
+        );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(9, (i) {
-          final digit = i + 1;
-          final isActive =
-              state.selectedDigit == digit ||
-              (selectedCell != null &&
-                  state.grid.valueAt(selectedCell) == digit);
-
-          return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: _DigitButton(
-                digit: digit,
-                active: isActive,
-                onTap: () => notifier.pressDigit(digit),
-              ),
+      padding: const .symmetric(horizontal: 16),
+      child: context.isExpanded
+          ? Wrap(spacing: 6, runSpacing: 6, children: buttons)
+          : Column(
+              mainAxisSize: .min,
+              children: [
+                Wrap(spacing: 6, children: buttons.sublist(0, 5)),
+                const SizedBox(height: 6),
+                Wrap(spacing: 6, children: buttons.sublist(5)),
+              ],
             ),
-          );
-        }),
-      ),
     );
   }
 }
 
 class _DigitButton extends StatelessWidget {
-  const _DigitButton({required this.digit, required this.active, this.onTap});
-  final int digit;
+  const _DigitButton({
+    required this.digit,
+    required this.active,
+    required this.count,
+    this.showCount = true,
+    required this.onTap,
+  });
+  final String digit;
   final bool active;
-  final VoidCallback? onTap;
+  final int count;
+  final bool showCount;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final scheme = Theme.of(context).colorScheme;
+    final remaining = showCount && count != 9
+        ? (count < 9 ? '${9 - count}' : '+${count - 9}')
+        : null;
 
-    return SizedBox(
-      height: context.isExpanded ? 64 : null,
-      child: AspectRatio(
-        aspectRatio: context.isExpanded ? 1.0 : 0.65,
-        child: Material(
-          color: active ? cs.primaryContainer : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: onTap,
-            child: Center(
+    return Container(
+      height: 48,
+      width: 48,
+      decoration: BoxDecoration(
+        color: active ? scheme.primary : Colors.transparent,
+        borderRadius: .circular(6),
+        border: .all(color: scheme.outlineVariant),
+      ),
+      child: InkWell(
+        mouseCursor: SystemMouseCursors.click,
+        borderRadius: .circular(6),
+        onTap: onTap,
+        child: Stack(
+          fit: StackFit.passthrough,
+          children: [
+            Center(
               child: Text(
-                '$digit',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: active ? cs.onPrimaryContainer : cs.onSurface,
+                digit,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: active ? scheme.surface : scheme.onSurface,
                 ),
               ),
             ),
-          ),
+            if (remaining != null)
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Text(
+                  remaining,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: active ? scheme.surface : scheme.onSurface,
+                    height: 1,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

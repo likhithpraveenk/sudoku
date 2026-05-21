@@ -4,15 +4,13 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [SimpleColoring] definition.
 class SimpleColoring implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
     for (var digit = 1; digit <= 9; digit++) {
-      // Adjacency list for conjugate pairs
       final adj = <int, List<int>>{};
       for (final unit in kGridUnits) {
         final spots = <int>[];
@@ -32,11 +30,11 @@ class SimpleColoring implements SudokuTechnique {
       if (adj.isEmpty) continue;
 
       final colored = <int>{};
-      final colorMap = <int, int>{}; // 0 or 1
+      final colorMap = <int, int>{};
 
       for (final start in adj.keys) {
         if (colored.contains(start)) continue;
-        // BFS to color component
+
         final queue = <int>[start];
         colorMap[start] = 0;
         colored.add(start);
@@ -57,7 +55,6 @@ class SimpleColoring implements SudokuTechnique {
         }
 
         if (conflict) {
-          // The color that contains the conflict (means both ends same color)
           for (var col = 0; col <= 1; col++) {
             final cellsOfColor = <int>[];
             for (final idx in queue) {
@@ -73,8 +70,6 @@ class SimpleColoring implements SudokuTechnique {
               }
             }
             if (intraConflict) {
-              // This color is false -> remove digit from all cells of
-              // this color
               for (final idx in cellsOfColor) {
                 if (grid.isCandidate(idx, digit)) {
                   return [
@@ -85,7 +80,6 @@ class SimpleColoring implements SudokuTechnique {
             }
           }
         } else {
-          // No conflict, apply "cell sees both colors" elimination.
           final color0Cells = queue.where((idx) => colorMap[idx] == 0).toSet();
           final color1Cells = queue.where((idx) => colorMap[idx] == 1).toSet();
 

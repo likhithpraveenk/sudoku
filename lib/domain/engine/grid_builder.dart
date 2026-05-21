@@ -3,13 +3,10 @@ import 'dart:math';
 import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [GridBuilder] definition.
 class GridBuilder {
-  /// Constructor for [GridBuilder].
   GridBuilder({Random? random}) : _random = random ?? Random();
   final Random _random;
 
-  /// The [build] method.
   SudokuGrid build() {
     final cells = List<int>.filled(81, 0);
     _backtrack(cells);

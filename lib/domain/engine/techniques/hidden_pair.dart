@@ -4,21 +4,13 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [HiddenPair] definition.
 class HiddenPair implements SudokuTechnique {
   @override
-  int get level => 2;
+  Difficulty get level => .medium;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
     for (final unit in kGridUnits) {
-      // We are looking for two digits that appear as candidates in exactly two
-      // cells in this unit and those two cells have no other candidates besides
-      // these two digits? Actually, hidden pair: The two digits are confined
-      // to exactly two cells in the unit, but those cells may have other
-      // candidates. We then remove all other candidates from those two cells.
-
-      // For each pair of digits (d1, d2) with d1 < d2
       for (var d1 = 1; d1 <= 8; d1++) {
         for (var d2 = d1 + 1; d2 <= 9; d2++) {
           final cellsWithBoth = <int>[];
@@ -32,8 +24,7 @@ class HiddenPair implements SudokuTechnique {
               }
             }
           }
-          // Check that these two digits appear only in these two cells in the
-          // unit
+
           var onlyInTheseCells = true;
           for (final i in unit) {
             if (grid.valueAt(i) == 0) {
@@ -47,9 +38,6 @@ class HiddenPair implements SudokuTechnique {
             }
           }
           if (onlyInTheseCells && cellsWithBoth.length == 2) {
-            // Found a hidden pair: cellsWithBoth[0] and cellsWithBoth[1] are
-            // the two cells
-            // Remove all other candidates from these two cells
             for (final cellIndex in cellsWithBoth) {
               final mask = grid.candidateMaskAt(cellIndex);
               final toRemove = <int>[];

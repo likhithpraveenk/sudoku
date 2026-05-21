@@ -4,18 +4,12 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [ClaimingPairs] definition.
 class ClaimingPairs implements SudokuTechnique {
   @override
-  int get level => 2;
+  Difficulty get level => .medium;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
-    // Claiming Pairs: if a digit is confined to a single box within a row
-    // or column, then it can be removed from the rest of the box.
-    // We'll check each row and each column.
-
-    // Check rows
     for (var row = 0; row < 9; row++) {
       final rowUnit = getRowUnit(row);
       for (var digit = 1; digit <= 9; digit++) {
@@ -30,11 +24,9 @@ class ClaimingPairs implements SudokuTechnique {
         }
         if (cellsWithDigit.isEmpty) continue;
 
-        // Check if all cellsWithDigit are in the same box
         final firstBox = getBox(cellsWithDigit[0]);
         final sameBox = cellsWithDigit.every((i) => getBox(i) == firstBox);
         if (sameBox) {
-          // Remove digit from all cells in the box that are not in this row
           final boxUnit = getBoxUnit(firstBox);
           for (final i in boxUnit) {
             if (!rowUnit.contains(i) && grid.valueAt(i) == 0) {
@@ -50,7 +42,6 @@ class ClaimingPairs implements SudokuTechnique {
       }
     }
 
-    // Check columns
     for (var col = 0; col < 9; col++) {
       final colUnit = getColUnit(col);
       for (var digit = 1; digit <= 9; digit++) {
@@ -65,11 +56,9 @@ class ClaimingPairs implements SudokuTechnique {
         }
         if (cellsWithDigit.isEmpty) continue;
 
-        // Check if all cellsWithDigit are in the same box
         final firstBox = getBox(cellsWithDigit[0]);
         final sameBox = cellsWithDigit.every((i) => getBox(i) == firstBox);
         if (sameBox) {
-          // Remove digit from all cells in the box that are not in this column
           final boxUnit = getBoxUnit(firstBox);
           for (final i in boxUnit) {
             if (!colUnit.contains(i) && grid.valueAt(i) == 0) {

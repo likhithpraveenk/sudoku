@@ -1,0 +1,39 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudoku/domain/models/board_state.dart';
+
+final boardProvider = NotifierProvider(BoardNotifier.new);
+
+class BoardNotifier extends Notifier<BoardState> {
+  @override
+  BoardState build() => const BoardState();
+
+  void selectCell(int index) {
+    state = state.copyWith(
+      selectedCell: state.selectedCell == index ? null : index,
+    );
+  }
+
+  void selectDigit(int digit) {
+    state = state.copyWith(
+      selectedDigit: state.selectedDigit == digit ? null : digit,
+    );
+  }
+
+  void toggleInputMode() {
+    final currentState = state;
+    state = state.copyWith(
+      inputMode: currentState.inputMode == .number ? .pencil : .number,
+      selectedCell: currentState.selectedCell,
+      selectedDigit: currentState.selectedDigit,
+    );
+  }
+
+  void setErrorCells(Set<int> errorCells) {
+    final currentState = state;
+    state = state.copyWith(
+      errorCells: errorCells,
+      selectedCell: currentState.selectedCell,
+      selectedDigit: currentState.selectedDigit,
+    );
+  }
+}

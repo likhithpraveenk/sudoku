@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
-/// An overlay shown to celebrate completing and solving the Sudoku puzzle.
-///
-/// This widget occupies the screen when a puzzle is successfully completed,
-/// displaying victory information such as the total elapsed time taken to
-/// solve the grid, the total number of mistakes made during gameplay, and
-/// an action button to return back to the main home screen.
 class SolvedOverlay extends ConsumerWidget {
-  /// Creates the solved victory overlay.
-  const SolvedOverlay({required this.state, super.key});
+  const SolvedOverlay({required this.state, this.onBack, super.key});
 
-  /// The final state of the solved game.
   final GameState state;
+
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,10 +34,12 @@ class SolvedOverlay extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text('Time: $timeStr', style: tt.bodyLarge),
-            Text('Mistakes: ${state.mistakeCount}', style: tt.bodyLarge),
             const SizedBox(height: 32),
             FilledButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                onBack?.call();
+                Navigator.of(context).pop();
+              },
               icon: const Icon(Icons.home_rounded),
               label: const Text('Back to Home'),
               style: FilledButton.styleFrom(

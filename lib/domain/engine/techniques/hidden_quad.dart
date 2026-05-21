@@ -4,16 +4,13 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [HiddenQuad] definition.
 class HiddenQuad implements SudokuTechnique {
   @override
-  int get level => 4;
+  Difficulty get level => .expert;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
     for (final unit in kGridUnits) {
-      // Precompute for each digit the set of cells in the unit where it
-      // is a candidate
       final digitToCells = <int, Set<int>>{};
       for (var digit = 1; digit <= 9; digit++) {
         final cells = <int>{};
@@ -25,7 +22,6 @@ class HiddenQuad implements SudokuTechnique {
         digitToCells[digit] = cells;
       }
 
-      // Iterate over all combinations of four distinct digits
       for (var d1 = 1; d1 <= 6; d1++) {
         for (var d2 = d1 + 1; d2 <= 7; d2++) {
           for (var d3 = d2 + 1; d3 <= 8; d3++) {
@@ -35,7 +31,6 @@ class HiddenQuad implements SudokuTechnique {
               final s3 = digitToCells[d3]!;
               final s4 = digitToCells[d4]!;
 
-              // Ensure none of the digit sets are empty
               if (s1.isEmpty || s2.isEmpty || s3.isEmpty || s4.isEmpty) {
                 continue;
               }
@@ -47,10 +42,6 @@ class HiddenQuad implements SudokuTechnique {
                 ..addAll(s4);
 
               if (union.length == 4) {
-                // Found a hidden quad: digits d1,d2,d3,d4 are confined to
-                // exactly four cells (union).
-                // Now, for each cell in the union, remove candidates that
-                // are not d1,d2,d3,d4.
                 final allowedDigits = <int>[d1, d2, d3, d4];
                 for (final cellIndex in union) {
                   final toRemove = <int>[];

@@ -2,10 +2,8 @@ import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
-/// The [toggleNote] method.
 GameState toggleNote(GameState state, int index, int digit) {
   if (state.puzzle.isGivenAt(index)) return state;
-  if (state.revealedCells.contains(index)) return state;
   if (state.grid.valueAt(index) != 0) return state;
 
   final current = Set<int>.from(state.notes[index]);
@@ -25,7 +23,6 @@ GameState toggleNote(GameState state, int index, int digit) {
   return state.copyWith(notes: newNotes, history: [...state.history, action]);
 }
 
-/// The [autoFillNotes] method.
 GameState autoFillNotes(GameState state) {
   final prevNotes = state.notes.map(Set<int>.from).toList();
 
@@ -52,7 +49,6 @@ GameState autoFillNotes(GameState state) {
   );
 }
 
-/// The [clearCellNotes] method.
 GameState clearCellNotes(GameState state, int index) {
   final newNotes = state.notes.map(Set<int>.from).toList();
   newNotes[index] = {};

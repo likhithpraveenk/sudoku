@@ -4,15 +4,13 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [TurbotFish] definition.
 class TurbotFish implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
     for (var digit = 1; digit <= 9; digit++) {
-      // Row-based Skyscraper
       final rowCandidates = <int, List<int>>{};
       for (var row = 0; row < 9; row++) {
         final cols = <int>[];
@@ -35,7 +33,6 @@ class TurbotFish implements SudokuTechnique {
           final cols1 = rowCandidates[r1]!;
           final cols2 = rowCandidates[r2]!;
 
-          // Check if they share exactly one column
           final shared = cols1.toSet().intersection(cols2.toSet());
           if (shared.length == 1) {
             final baseCol = shared.first;
@@ -45,7 +42,6 @@ class TurbotFish implements SudokuTechnique {
             final tip1 = r1 * 9 + tipCol1;
             final tip2 = r2 * 9 + tipCol2;
 
-            // Target cells see both tips
             for (var target = 0; target < 81; target++) {
               if (target == tip1 || target == tip2) continue;
               if (grid.valueAt(target) != 0) continue;
@@ -61,7 +57,6 @@ class TurbotFish implements SudokuTechnique {
         }
       }
 
-      // Column-based Skyscraper
       final colCandidates = <int, List<int>>{};
       for (var col = 0; col < 9; col++) {
         final rows = <int>[];
@@ -84,7 +79,6 @@ class TurbotFish implements SudokuTechnique {
           final rows1 = colCandidates[c1]!;
           final rows2 = colCandidates[c2]!;
 
-          // Check if they share exactly one row
           final shared = rows1.toSet().intersection(rows2.toSet());
           if (shared.length == 1) {
             final baseRow = shared.first;
@@ -94,7 +88,6 @@ class TurbotFish implements SudokuTechnique {
             final tip1 = tipRow1 * 9 + c1;
             final tip2 = tipRow2 * 9 + c2;
 
-            // Target cells see both tips
             for (var target = 0; target < 81; target++) {
               if (target == tip1 || target == tip2) continue;
               if (grid.valueAt(target) != 0) continue;

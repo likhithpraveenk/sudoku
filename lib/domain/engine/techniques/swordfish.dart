@@ -3,14 +3,12 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [Swordfish] definition.
 class Swordfish implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
-    // Row-based Swordfish
     for (var digit = 1; digit <= 9; digit++) {
       final rowCandidates = <int, List<int>>{};
       for (var row = 0; row < 9; row++) {
@@ -41,8 +39,6 @@ class Swordfish implements SudokuTechnique {
                 ..addAll(rowCandidates[r3]!);
 
               if (unionCols.length == 3) {
-                // Found a Swordfish!
-                // Eliminate digit from target columns outside of r1, r2, r3
                 for (final col in unionCols) {
                   for (var row = 0; row < 9; row++) {
                     if (row != r1 && row != r2 && row != r3) {
@@ -63,7 +59,6 @@ class Swordfish implements SudokuTechnique {
       }
     }
 
-    // Column-based Swordfish
     for (var digit = 1; digit <= 9; digit++) {
       final colCandidates = <int, List<int>>{};
       for (var col = 0; col < 9; col++) {
@@ -94,8 +89,6 @@ class Swordfish implements SudokuTechnique {
                 ..addAll(colCandidates[c3]!);
 
               if (unionRows.length == 3) {
-                // Found a Swordfish!
-                // Eliminate digit from target rows outside of c1, c2, c3
                 for (final row in unionRows) {
                   for (var col = 0; col < 9; col++) {
                     if (col != c1 && col != c2 && col != c3) {

@@ -4,10 +4,9 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/hint.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
-/// [NakedQuad] definition.
 class NakedQuad implements SudokuTechnique {
   @override
-  int get level => 3;
+  Difficulty get level => .hard;
 
   @override
   List<Hint> getHints(SudokuGrid grid) {
@@ -18,7 +17,6 @@ class NakedQuad implements SudokuTechnique {
       }
       if (unsolved.length < 5) continue;
 
-      // Check every subset of 4 unsolved cells
       for (var a = 0; a < unsolved.length - 3; a++) {
         final ia = unsolved[a];
         final ca = grid.getCandidates(ia).toSet();
@@ -38,9 +36,6 @@ class NakedQuad implements SudokuTechnique {
 
               final union = ca.union(cb).union(cc).union(cd);
               if (union.length == 4) {
-                // Found a Naked Quad!
-                // Eliminate union candidates from other unsolved cells in
-                // this unit
                 for (final i in unsolved) {
                   if (i == ia || i == ib || i == ic || i == id) continue;
                   final toRemove = union.intersection(
