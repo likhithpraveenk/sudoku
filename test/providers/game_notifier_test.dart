@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
-import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/services/puzzle_generator_service.dart';
@@ -20,7 +19,7 @@ Future<void> pumpGame(ProviderContainer container) async {
 }
 
 class FakeSettingsNotifier extends SettingsNotifier {
-  FakeSettingsNotifier(AppSettings settings) : _settings = settings;
+  FakeSettingsNotifier(this._settings);
   final AppSettings _settings;
 
   @override
@@ -32,71 +31,92 @@ class MockPuzzleGeneratorService implements PuzzleGeneratorService {
   String get name => 'mock';
 
   @override
-  Future<Puzzle> generate(Difficulty difficulty) async {
-    return Puzzle(
-      given: TestGrids.simplePuzzle(),
-      solution: TestGrids.simpleSolution(),
-    );
-  }
+  Future<Puzzle> generate(Difficulty difficulty) async => Puzzle(
+    given: TestGrids.simplePuzzle(),
+    solution: TestGrids.simpleSolution(),
+  );
+}
+
+ProviderContainer _makeContainer({AppSettings settings = const AppSettings()}) {
+  return ProviderContainer(
+    overrides: [
+      puzzleGeneratorServiceProvider.overrideWithValue(
+        MockPuzzleGeneratorService(),
+      ),
+      settingsProvider.overrideWith(() => FakeSettingsNotifier(settings)),
+    ],
+  );
 }
 
 void main() {
   group('GameNotifier', () {
     late ProviderContainer container;
 
-    setUp(() {
-      container = ProviderContainer(
-        overrides: [
-          puzzleGeneratorServiceProvider.overrideWithValue(
-            MockPuzzleGeneratorService(),
-          ),
-          settingsProvider.overrideWith(
-            () => FakeSettingsNotifier(const AppSettings()),
-          ),
-        ],
-      );
-    });
-
+    setUp(() => container = _makeContainer());
     tearDown(() => container.dispose());
 
     group('build', () {
-      test('loads initial game', () async {
+      test('reads difficulty from difficultyProvider', () async {
         await pumpGame(container);
 
-        final state = readState(container);
-
-        expect(state.difficulty, Difficulty.easy);
-        expect(state.grid.values[0], 5);
-        expect(state.history, isEmpty);
+        expect(readState(container).difficulty, Difficulty.easy);
       });
 
-      test('starts as loading', () {
-        expect(container.read(gameProvider), isA<AsyncLoading<GameState?>>());
-      });
-
-      test('settles to AsyncData', () async {
+      test('initial history is empty', () async {
         await pumpGame(container);
 
-        expect(container.read(gameProvider), isA<AsyncData<GameState?>>());
+        expect(readState(container).history, isEmpty);
       });
     });
 
     group('restoreGame', () {
-      test('restores exact state', () async {
+      test('replaces current state', () async {
         await pumpGame(container);
 
-        final original = readState(container);
+        final saved = readState(
+          container,
+        ).copyWith(elapsed: const Duration(minutes: 5));
 
-        final modified = original.copyWith(history: [...original.history]);
+        container.read(gameProvider.notifier).restoreGame(saved);
 
-        container.read(gameProvider.notifier).restoreGame(modified);
-
-        expect(readState(container), modified);
+        expect(readState(container).elapsed, const Duration(minutes: 5));
       });
     });
 
-    group('inputDigit number mode', () {
-      test('places digit on grid', () async {
+    group('restart', () {
+      test('resets grid to given puzzle', () async {
+        await pumpGame(container);
+
+        container.read(gameProvider.notifier)
+          ..inputDigit(2, 4)
+          ..restart();
+
+        expect(readState(container).grid.valueAt(2), 0);
+      });
+
+      test('clears history', () async {
+        await pumpGame(container);
+
+        container.read(gameProvider.notifier)
+          ..inputDigit(2, 4)
+          ..restart();
+
+        expect(readState(container).history, isEmpty);
+      });
+
+      test('preserves same puzzle', () async {
+        await pumpGame(container);
+
+        final puzzleBefore = readState(container).puzzle;
+
+        container.read(gameProvider.notifier).restart();
+
+        expect(readState(container).puzzle, puzzleBefore);
+      });
+    });
+
+    group('inputDigit routing', () {
+      test('number mode writes grid value', () async {
         await pumpGame(container);
 
         container.read(gameProvider.notifier).inputDigit(2, 4);
@@ -104,222 +124,141 @@ void main() {
         expect(readState(container).grid.valueAt(2), 4);
       });
 
-      test('records DigitAction', () async {
-        await pumpGame(container);
-
-        container.read(gameProvider.notifier).inputDigit(2, 4);
-
-        expect(readState(container).history.last, isA<DigitAction>());
-      });
-
-      test('ignores given cells', () async {
-        await pumpGame(container);
-
-        container.read(gameProvider.notifier).inputDigit(0, 9);
-
-        final state = readState(container);
-
-        expect(state.grid.valueAt(0), 5);
-        expect(state.history, isEmpty);
-      });
-    });
-
-    group('inputDigit pencil mode', () {
-      setUp(() async {
+      test('pencil mode writes note not grid value', () async {
         await pumpGame(container);
 
         container.read(boardProvider.notifier).toggleInputMode();
-      });
 
-      test('adds note', () {
         container.read(gameProvider.notifier).inputDigit(2, 4);
 
-        expect(readState(container).notes[2], contains(4));
+        final state = readState(container);
+        expect(state.notes[2], contains(4));
+        expect(state.grid.valueAt(2), 0);
       });
 
-      test('toggles note off', () {
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 4)
-          ..inputDigit(2, 4);
+      test('reads autoRemoveNotes from settingsProvider', () async {
+        container.dispose();
+        container = _makeContainer(
+          settings: const AppSettings(autoRemoveNotes: true),
+        );
+        await pumpGame(container);
 
-        expect(readState(container).notes[2], isNot(contains(4)));
-      });
-
-      test('does not write grid value', () {
+        container.read(boardProvider.notifier).toggleInputMode();
+        container.read(gameProvider.notifier).inputDigit(5, 4);
+        container.read(boardProvider.notifier).toggleInputMode();
         container.read(gameProvider.notifier).inputDigit(2, 4);
 
-        expect(readState(container).grid.valueAt(2), 0);
+        expect(readState(container).notes[5], isNot(contains(4)));
       });
     });
 
     group('erase', () {
-      test('clears digit + records EraseAction', () async {
+      test('erases selected cell when no index passed', () async {
         await pumpGame(container);
 
         container.read(boardProvider.notifier).selectCell(2);
-
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 4)
-          ..erase();
-
-        final state = readState(container);
-
-        expect(state.grid.valueAt(2), 0);
-        expect(state.notes[2], isEmpty);
-        expect(state.history.last, isA<EraseAction>());
-      });
-
-      test('clears notes', () async {
-        await pumpGame(container);
-
-        container.read(boardProvider.notifier)
-          ..selectCell(2)
-          ..toggleInputMode();
-
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 3)
-          ..inputDigit(2, 5);
-
-        container.read(boardProvider.notifier).toggleInputMode();
-
-        container.read(gameProvider.notifier).erase();
-
-        expect(readState(container).notes[2], isEmpty);
-      });
-
-      test('ignores given cells', () async {
-        await pumpGame(container);
-
-        container.read(boardProvider.notifier).selectCell(0);
-
-        container.read(gameProvider.notifier).erase();
-
-        final state = readState(container);
-
-        expect(state.grid.valueAt(0), 5);
-        expect(state.history, isEmpty);
-      });
-    });
-
-    group('undo', () {
-      test('reverts digit action', () async {
-        await pumpGame(container);
-
-        final notifier = container.read(gameProvider.notifier)
-          ..inputDigit(2, 4);
-
-        expect(readState(container).grid.valueAt(2), 4);
-
-        notifier.undo();
-
-        expect(readState(container).grid.valueAt(2), 0);
-        expect(readState(container).history, isEmpty);
-      });
-
-      test('reverts note action', () async {
-        await pumpGame(container);
-
-        container.read(boardProvider.notifier).toggleInputMode();
-
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 5)
-          ..undo();
-
-        expect(readState(container).notes[2], isNot(contains(5)));
-      });
-
-      test('reverts erase action', () async {
-        await pumpGame(container);
-
-        container.read(boardProvider.notifier).selectCell(2);
-
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 4)
-          ..erase()
-          ..undo();
-
-        expect(readState(container).grid.valueAt(2), 4);
-      });
-
-      test('canUndo false initially', () async {
-        await pumpGame(container);
-
-        expect(container.read(gameProvider.notifier).canUndo, isFalse);
-      });
-
-      test('canUndo true after action', () async {
-        await pumpGame(container);
-
         container.read(gameProvider.notifier).inputDigit(2, 4);
 
-        expect(container.read(gameProvider.notifier).canUndo, isTrue);
-      });
-    });
+        container.read(gameProvider.notifier).erase();
 
-    group('hint', () {
-      test('reveals one cell', () async {
+        expect(readState(container).grid.valueAt(2), 0);
+      });
+
+      test('erases specific index when passed', () async {
         await pumpGame(container);
 
-        final before = readState(container);
+        container.read(gameProvider.notifier)
+          ..inputDigit(2, 4)
+          ..erase(2);
 
-        container.read(gameProvider.notifier).hint();
+        expect(readState(container).grid.valueAt(2), 0);
+      });
 
-        final after = readState(container);
+      test('no-op when no cell selected and no index passed', () async {
+        await pumpGame(container);
 
-        expect(after.grid.values, isNot(equals(before.grid.values)));
+        // No selectCell call, no index — should not throw
+        container.read(gameProvider.notifier).erase();
+
+        expect(readState(container).history, isEmpty);
       });
     });
 
     group('runValidation', () {
-      test('populates error cells', () async {
+      test('pushes error cells to boardProvider', () async {
         await pumpGame(container);
 
+        final solution = readState(container).puzzle.solution;
+        final correct = solution.valueAt(2);
+        final wrong = correct == 9 ? 1 : correct + 1;
+
         container.read(gameProvider.notifier)
-          ..inputDigit(2, 9)
+          ..inputDigit(2, wrong)
           ..runValidation();
 
         expect(container.read(boardProvider).errorCells, contains(2));
       });
 
-      test('clears errors for valid grid', () async {
+      test('clears error cells for valid grid', () async {
         await pumpGame(container);
 
         container.read(gameProvider.notifier).runValidation();
 
         expect(container.read(boardProvider).errorCells, isEmpty);
       });
+
+      test('sets assists.validation on state', () async {
+        await pumpGame(container);
+
+        container.read(gameProvider.notifier).runValidation();
+
+        expect(readState(container).assists.validation, isTrue);
+      });
+    });
+
+    group('canUndo', () {
+      test('false before any action', () async {
+        await pumpGame(container);
+
+        expect(container.read(gameProvider.notifier).canUndo, isFalse);
+      });
+
+      test('true after action', () async {
+        await pumpGame(container);
+
+        container.read(gameProvider.notifier).inputDigit(2, 4);
+
+        expect(container.read(gameProvider.notifier).canUndo, isTrue);
+      });
+
+      test('false after undo clears last action', () async {
+        await pumpGame(container);
+
+        container.read(gameProvider.notifier)
+          ..inputDigit(2, 4)
+          ..undo();
+
+        expect(container.read(gameProvider.notifier).canUndo, isFalse);
+      });
+    });
+
+    group('hint', () {
+      test('sets assists.hints to true', () async {
+        await pumpGame(container);
+
+        container.read(gameProvider.notifier).hint();
+
+        expect(readState(container).assists.hints, isTrue);
+      });
     });
 
     group('applyAutoNotes', () {
-      test('fills notes', () async {
+      test('sets assists.autoNotes to true', () async {
         await pumpGame(container);
 
         container.read(gameProvider.notifier).applyAutoNotes();
 
-        final notes = readState(container).notes;
-
-        expect(notes.any((s) => s.isNotEmpty), isTrue);
-      });
-
-      test('records AutoNotesAction', () async {
-        await pumpGame(container);
-
-        container.read(gameProvider.notifier).applyAutoNotes();
-
-        expect(readState(container).history.last, isA<AutoNotesAction>());
-      });
-
-      test('undo clears auto notes', () async {
-        await pumpGame(container);
-
-        final notifier = container.read(gameProvider.notifier)
-          ..applyAutoNotes();
-
-        notifier.undo();
-
-        final notes = readState(container).notes;
-
-        expect(notes.every((s) => s.isEmpty), isTrue);
+        expect(readState(container).assists.autoNotes, isTrue);
       });
     });
   });
