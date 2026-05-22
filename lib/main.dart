@@ -12,7 +12,8 @@ Future<void> main() async {
   await Future.wait([
     Hive.openBox<String>(settingsBox),
     Hive.openBox<String>(themeBox),
-    Hive.openBox<String>(statsBox),
+    Hive.openBox<List>(statsBox),
+    Hive.openBox<String>(gameBox),
   ]);
   // debugRepaintRainbowEnabled = true;
   runApp(const ProviderScope(child: MyApp()));

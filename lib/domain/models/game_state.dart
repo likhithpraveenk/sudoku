@@ -81,4 +81,46 @@ class GameState {
           puzzleComplete == other.puzzleComplete &&
           elapsed == other.elapsed &&
           assists == other.assists;
+
+  factory GameState.fromJson(Map<String, dynamic> json) {
+    final given = SudokuGrid(
+      values: List<int>.from(json['givenValues'] as List),
+    );
+    final solution = SudokuGrid(
+      values: List<int>.from(json['solutionValues'] as List),
+    );
+    final grid = SudokuGrid(values: List<int>.from(json['gridValues'] as List));
+    final notes = (json['notes'] as List)
+        .map((e) => Set<int>.from(e as List))
+        .toList();
+    final assistsMap = Map<String, dynamic>.from(json['assists'] as Map);
+
+    return GameState(
+      difficulty: Difficulty.fromValue(json['difficulty'] as int),
+      elapsed: Duration(seconds: json['elapsed'] as int),
+      puzzle: Puzzle(given: given, solution: solution),
+      grid: grid,
+      notes: notes,
+      history: const [],
+      assists: GameAssists(
+        hints: assistsMap['hints'] as bool,
+        autoNotes: assistsMap['autoNotes'] as bool,
+        validation: assistsMap['validation'] as bool,
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'difficulty': difficulty.value,
+    'elapsed': elapsed.inSeconds,
+    'gridValues': grid.values,
+    'solutionValues': puzzle.solution.values,
+    'givenValues': puzzle.given.values,
+    'notes': notes.map((s) => s.toList()).toList(),
+    'assists': {
+      'hints': assists.hints,
+      'autoNotes': assists.autoNotes,
+      'validation': assists.validation,
+    },
+  };
 }

@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/screens/game_screen.dart';
 import 'package:sudoku/presentation/screens/settings_screen.dart';
+import 'package:sudoku/presentation/shared/utils.dart';
 import 'package:sudoku/presentation/widgets/difficulty_selector.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
+import 'package:sudoku/providers/services_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final saved = ref.watch(continueGameProvider).value;
+    final continueGame = ref.read(continueGameFlagProvider.notifier);
 
     return Scaffold(
       body: SafeArea(
@@ -28,13 +32,30 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 36),
                       const DifficultySelector(),
                       const SizedBox(height: 16),
-                      ...[
-                        // TODO: continue game
+                      if (saved != null) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              continueGame.state = true;
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const GameScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Continue ${formatTime(saved.elapsed)}',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                       ],
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
                           onPressed: () {
+                            continueGame.state = false;
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => const GameScreen(),
@@ -46,7 +67,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       Row(
-                        mainAxisAlignment: .center,
+                        mainAxisAlignment: .spaceEvenly,
                         children: [
                           IconButton(
                             tooltip: 'Settings',

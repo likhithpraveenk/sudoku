@@ -53,16 +53,7 @@ class DigitPad extends ConsumerWidget {
     return Padding(
       padding: const .symmetric(horizontal: 16),
       child: context.isExpanded
-          ? Column(
-              mainAxisSize: .min,
-              children: [
-                Row(spacing: 6, children: buttons.sublist(0, 3)),
-                const SizedBox(height: 6),
-                Row(spacing: 6, children: buttons.sublist(3, 6)),
-                const SizedBox(height: 6),
-                Row(spacing: 6, children: buttons.sublist(6)),
-              ],
-            )
+          ? Wrap(spacing: 6, runSpacing: 6, children: [...buttons])
           : Column(
               mainAxisSize: .min,
               children: [

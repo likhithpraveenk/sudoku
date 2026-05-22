@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sudoku/data/services/save_game_service.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
@@ -7,6 +8,7 @@ import 'package:sudoku/domain/services/puzzle_generator_service.dart';
 import 'package:sudoku/presentation/models/app_settings.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
 import '../helpers/sudoku_grids.dart';
@@ -16,6 +18,22 @@ GameState readState(ProviderContainer container) =>
 
 Future<void> pumpGame(ProviderContainer container) async {
   await container.read(gameProvider.future);
+}
+
+class FakeSaveGameService implements SaveGameService {
+  final Map<Difficulty, GameState> _store = {};
+
+  @override
+  Future<void> save(GameState state) async => _store[state.difficulty] = state;
+
+  @override
+  GameState? load(Difficulty difficulty) => _store[difficulty];
+
+  @override
+  Future<void> delete(Difficulty difficulty) async => _store.remove(difficulty);
+
+  @override
+  bool hasSavedGame(Difficulty difficulty) => _store[difficulty] != null;
 }
 
 class FakeSettingsNotifier extends SettingsNotifier {
@@ -37,13 +55,18 @@ class MockPuzzleGeneratorService implements PuzzleGeneratorService {
   );
 }
 
-ProviderContainer _makeContainer({AppSettings settings = const AppSettings()}) {
+ProviderContainer _makeContainer({
+  AppSettings settings = const AppSettings(),
+  bool continueGame = false,
+}) {
   return ProviderContainer(
     overrides: [
       puzzleGeneratorServiceProvider.overrideWithValue(
         MockPuzzleGeneratorService(),
       ),
       settingsProvider.overrideWith(() => FakeSettingsNotifier(settings)),
+      saveGameServiceProvider.overrideWithValue(FakeSaveGameService()),
+      continueGameFlagProvider.overrideWith((ref) => continueGame),
     ],
   );
 }
@@ -69,18 +92,39 @@ void main() {
       });
     });
 
-    group('restoreGame', () {
-      test('replaces current state', () async {
-        await pumpGame(container);
+    test('loads saved game when continueGameFlag is true', () async {
+      final savedState = GameState.newGame(
+        puzzle: Puzzle(
+          given: TestGrids.simplePuzzle(),
+          solution: TestGrids.simpleSolution(),
+        ),
+        difficulty: .easy,
+      ).copyWith(elapsed: const Duration(minutes: 3));
 
-        final saved = readState(
-          container,
-        ).copyWith(elapsed: const Duration(minutes: 5));
+      final service = FakeSaveGameService()..save(savedState);
 
-        container.read(gameProvider.notifier).restoreGame(saved);
+      container = ProviderContainer(
+        overrides: [
+          puzzleGeneratorServiceProvider.overrideWithValue(
+            MockPuzzleGeneratorService(),
+          ),
+          settingsProvider.overrideWith(
+            () => FakeSettingsNotifier(const AppSettings()),
+          ),
+          saveGameServiceProvider.overrideWithValue(service),
+          continueGameFlagProvider.overrideWith((ref) => true),
+        ],
+      );
 
-        expect(readState(container).elapsed, const Duration(minutes: 5));
-      });
+      await pumpGame(container);
+
+      expect(readState(container).elapsed, const Duration(minutes: 3));
+    });
+
+    test('generates new game when continueGameFlag is false', () async {
+      await pumpGame(container);
+
+      expect(readState(container).elapsed, Duration.zero);
     });
 
     group('restart', () {

@@ -1,52 +1,144 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/game_state.dart';
+import 'package:sudoku/domain/models/stat_record.dart';
+import 'package:sudoku/presentation/shared/utils.dart';
+import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/services_provider.dart';
 
-class SolvedOverlay extends ConsumerWidget {
-  const SolvedOverlay({required this.state, this.onBack, super.key});
+void showSolvedOverlay(BuildContext context, WidgetRef ref) {
+  final game = ref.read(gameProvider).value;
+  final record = ref.read(gameProvider.notifier).lastRecord;
+  if (game == null || !game.puzzleComplete || record == null) {
+    return;
+  }
+  final top = ref.watch(topStatsProvider(game.difficulty));
+  final list = record.isClean ? top.clean : top.assisted;
 
-  final GameState state;
+  final displayList = list.take(10).toList();
+  final currentRecordIndex = list.indexWhere(
+    (item) => item.completedAt == record.completedAt,
+  );
+  final isRecordInTop10 = currentRecordIndex >= 0 && currentRecordIndex < 10;
 
-  final VoidCallback? onBack;
+  if (!isRecordInTop10 && currentRecordIndex != -1) {
+    displayList.add(record);
+  }
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      final scheme = Theme.of(context).colorScheme;
+
+      return Dialog(
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        child: SolvedOverlay(
+          currentRecordIndex: currentRecordIndex,
+          record: record,
+          displayList: displayList,
+        ),
+      );
+    },
+  );
+}
+
+class SolvedOverlay extends StatelessWidget {
+  const SolvedOverlay({
+    required this.record,
+    required this.displayList,
+    required this.currentRecordIndex,
+    super.key,
+  });
+
+  final int currentRecordIndex;
+  final StatRecord record;
+  final List<StatRecord> displayList;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    final minutes = state.elapsed.inMinutes;
-    final seconds = state.elapsed.inSeconds % 60;
-    final mStr = minutes.toString().padLeft(2, '0');
-    final sStr = seconds.toString().padLeft(2, '0');
-    final timeStr = '$mStr:$sStr';
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 480),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: .circular(12),
+          border: .all(color: scheme.primary),
+        ),
+        padding: const .all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
-            Icon(Icons.emoji_events_rounded, size: 72, color: cs.primary),
-            const SizedBox(height: 16),
             Text(
-              'Puzzle Solved!',
-              style: tt.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
+              record.difficulty.displayName,
+              style: textTheme.labelLarge?.copyWith(
+                color: scheme.primary,
+                fontWeight: .bold,
+              ),
             ),
-            const SizedBox(height: 8),
-            Text('Time: $timeStr', style: tt.bodyLarge),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: () {
-                onBack?.call();
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.home_rounded),
-              label: const Text('Back to Home'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(200, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            if (!record.isClean) ...[
+              const SizedBox(height: 6),
+              Text(
+                'Assists Used', // TODO add assists
+                style: textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: displayList.length,
+                itemBuilder: (context, index) {
+                  final item = displayList[index];
+                  final isCurrentRecord =
+                      item.completedAt == record.completedAt;
+                  final trueRank = isCurrentRecord
+                      ? currentRecordIndex + 1
+                      : index + 1;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 32,
+                          child: Text(
+                            '$trueRank.',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: isCurrentRecord ? .bold : .normal,
+                              color: isCurrentRecord
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            formatDate(item.completedAt),
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: isCurrentRecord ? .bold : .normal,
+                              color: isCurrentRecord
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          formatTime(item.time),
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: isCurrentRecord ? .bold : .normal,
+                            color: isCurrentRecord
+                                ? scheme.primary
+                                : scheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
