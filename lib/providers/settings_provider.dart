@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:sudoku/data/hive_boxes.dart';
-import 'package:sudoku/domain/models/app_settings.dart';
+import 'package:sudoku/presentation/models/app_settings.dart';
 import 'package:sudoku/presentation/shared/grid_placement.dart';
 
 final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
