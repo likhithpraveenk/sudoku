@@ -97,7 +97,7 @@ class _Cell extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         unawaited(HapticFeedback.selectionClick());
-        if (board.inputMode == .pencil && board.selectedDigit != null) {
+        if (board.selectedDigit != null) {
           ref
               .read(gameProvider.notifier)
               .inputDigit(index, board.selectedDigit!);

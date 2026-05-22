@@ -2,13 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/data/services/puzzle_generator_service.dart';
-import 'package:sudoku/domain/models/game_action.dart';
+import 'package:sudoku/domain/engine/game_engine.dart';
 import 'package:sudoku/domain/models/game_state.dart';
-import 'package:sudoku/domain/services/hint_service.dart';
-import 'package:sudoku/domain/services/note_service.dart';
 import 'package:sudoku/domain/services/puzzle_generator_service.dart';
-import 'package:sudoku/domain/services/sudoku_rules.dart';
-import 'package:sudoku/domain/services/undo_service.dart';
 import 'package:sudoku/presentation/models/board_state.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
@@ -17,13 +13,12 @@ final puzzleGeneratorServiceProvider = Provider<PuzzleGeneratorService>(
   (ref) => const IsolatePuzzleGeneratorService(),
 );
 
-final gameProvider =
-    AsyncNotifierProvider.autoDispose<GameNotifier, GameState?>(
-      GameNotifier.new,
-    );
+final gameProvider = AsyncNotifierProvider.autoDispose(GameNotifier.new);
 
 class GameNotifier extends AsyncNotifier<GameState?> {
   BoardState get board => ref.read(boardProvider);
+  late GameEngine _gameEngine;
+  Timer? _timer;
 
   @override
   Future<GameState?> build() async {
@@ -34,81 +29,79 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     final puzzle = await ref
         .read(puzzleGeneratorServiceProvider)
         .generate(difficulty);
+    final initialState = GameState.newGame(
+      puzzle: puzzle,
+      difficulty: difficulty,
+    );
+    _gameEngine = GameEngine(initialState);
     _startTimer();
-    return GameState.newGame(puzzle: puzzle, difficulty: difficulty);
+    return _gameEngine.currentState;
   }
-
-  // TODO: stop timer on puzzle complete
-
-  Timer? _timer;
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _update(
-        (s) => s.copyWith(elapsed: s.elapsed + const Duration(seconds: 1)),
-      );
+      _gameEngine.tick();
+      state = AsyncData(_gameEngine.currentState);
     });
+  }
+
+  void saveGame() {
+    _timer?.cancel();
+    _timer = null;
+    // TODO: another hive box for saved games?
   }
 
   void restoreGame(GameState saved) {
-    state = AsyncData(saved);
+    _gameEngine = GameEngine(saved);
     _startTimer();
+    state = AsyncData(_gameEngine.currentState);
   }
 
-  void inputDigit(int cellIndex, int digit) => _update((s) {
-    return board.inputMode == .pencil
-        ? toggleNote(s, cellIndex, digit)
-        : applyDigit(s, cellIndex, digit);
-  });
+  void inputDigit(int cellIndex, int digit) {
+    if (board.inputMode == .number) {
+      _gameEngine.inputDigit(cellIndex, digit);
+    } else {
+      _gameEngine.toggleNote(cellIndex, digit);
+    }
+    state = AsyncData(_gameEngine.currentState);
+  }
 
   void erase() {
-    _update((s) {
-      if (board.selectedCell == null) return s;
-
-      final cellIndex = board.selectedCell!;
-      if (s.puzzle.isGivenAt(cellIndex)) return s;
-
-      final previousValue = s.grid.valueAt(cellIndex);
-      final previousNotes = Set<int>.from(s.notes[cellIndex]);
-      final action = EraseAction(
-        cellIndex: cellIndex,
-        previousValue: previousValue,
-        previousNotes: previousNotes,
-      );
-
-      final grid = s.grid.clone()..clearValue(cellIndex);
-      final nextState = clearCellNotes(s, cellIndex);
-
-      return nextState.copyWith(grid: grid, history: [...s.history, action]);
-    });
+    if (board.selectedCell == null) return;
+    _gameEngine.erase(board.selectedCell!);
+    state = AsyncData(_gameEngine.currentState);
   }
 
-  void undo() => _update(popUndo);
+  void undo() {
+    _gameEngine.undo();
+    state = AsyncData(_gameEngine.currentState);
+  }
 
-  void hint() => _update(revealCell);
+  void hint() {
+    _gameEngine.revealHint();
+    state = AsyncData(_gameEngine.currentState);
+  }
 
-  void runValidation() => _update((s) {
-    final errors = findErrors(s);
+  void runValidation() {
+    final errors = _gameEngine.findErrors();
     ref.read(boardProvider.notifier).setErrorCells(errors);
-    return s;
-  });
-
-  void applyAutoNotes() => _update(autoFillNotes);
-
-  void restart() => _update(
-    (s) => s.copyWith(notes: List.generate(81, (_) => {}), history: []),
-  );
-
-  void stopTimer() {
-    _timer?.cancel();
-    _timer = null;
+    state = AsyncData(_gameEngine.currentState);
   }
 
-  bool get canUndo => state.value?.history.isNotEmpty == true;
-
-  void _update(GameState Function(GameState) func) {
-    final current = state.value;
-    if (current == null) return;
-    state = AsyncData(func(current));
+  void applyAutoNotes() {
+    _gameEngine.autoFillNotes();
+    state = AsyncData(_gameEngine.currentState);
   }
+
+  void restart() {
+    final currentState = _gameEngine.currentState;
+    final newState = GameState.newGame(
+      puzzle: currentState.puzzle,
+      difficulty: currentState.difficulty,
+    );
+    _gameEngine = GameEngine(newState);
+    state = AsyncData(_gameEngine.currentState);
+  }
+
+  bool get canUndo => _gameEngine.canUndo;
 }
