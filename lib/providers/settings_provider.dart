@@ -26,16 +26,22 @@ class SettingsNotifier extends Notifier<AppSettings> {
   }
 
   Future<void> update({
-    bool? showRemaining,
+    bool? showRemainingCounts,
     bool? showTimer,
+    bool? maskGivenCells,
+    bool? autoRemoveNotes,
+    bool? highlightSameDigits,
     double? gridWidth,
     double? horizontalSpacing,
     double? verticalSpacing,
     GridPlacement? placement,
   }) async {
     state = state.copyWith(
-      showRemaining: showRemaining,
+      showRemainingCounts: showRemainingCounts,
       showTimer: showTimer,
+      maskGivenCells: maskGivenCells,
+      autoRemoveNotes: autoRemoveNotes,
+      highlightSameDigits: highlightSameDigits,
       gridWidth: gridWidth,
       horizontalSpacing: horizontalSpacing,
       verticalSpacing: verticalSpacing,

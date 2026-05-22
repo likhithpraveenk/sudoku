@@ -5,8 +5,10 @@ import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/services/puzzle_generator_service.dart';
+import 'package:sudoku/presentation/models/app_settings.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 
 import '../helpers/sudoku_grids.dart';
 
@@ -15,6 +17,14 @@ GameState readState(ProviderContainer container) =>
 
 Future<void> pumpGame(ProviderContainer container) async {
   await container.read(gameProvider.future);
+}
+
+class FakeSettingsNotifier extends SettingsNotifier {
+  FakeSettingsNotifier(AppSettings settings) : _settings = settings;
+  final AppSettings _settings;
+
+  @override
+  AppSettings build() => _settings;
 }
 
 class MockPuzzleGeneratorService implements PuzzleGeneratorService {
@@ -39,6 +49,9 @@ void main() {
         overrides: [
           puzzleGeneratorServiceProvider.overrideWithValue(
             MockPuzzleGeneratorService(),
+          ),
+          settingsProvider.overrideWith(
+            () => FakeSettingsNotifier(const AppSettings()),
           ),
         ],
       );

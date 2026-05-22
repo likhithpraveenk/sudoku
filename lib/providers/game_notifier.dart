@@ -8,6 +8,7 @@ import 'package:sudoku/domain/services/puzzle_generator_service.dart';
 import 'package:sudoku/presentation/models/board_state.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 
 final puzzleGeneratorServiceProvider = Provider<PuzzleGeneratorService>(
   (ref) => const IsolatePuzzleGeneratorService(),
@@ -25,10 +26,12 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     ref.onDispose(() {
       _timer?.cancel();
     });
+
     final difficulty = ref.read(difficultyProvider);
     final puzzle = await ref
         .read(puzzleGeneratorServiceProvider)
         .generate(difficulty);
+
     final initialState = GameState.newGame(
       puzzle: puzzle,
       difficulty: difficulty,
@@ -59,16 +62,24 @@ class GameNotifier extends AsyncNotifier<GameState?> {
 
   void inputDigit(int cellIndex, int digit) {
     if (board.inputMode == .number) {
-      _gameEngine.inputDigit(cellIndex, digit);
+      final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
+      _gameEngine.inputDigit(
+        cellIndex,
+        digit,
+        autoRemoveNotes: autoRemoveNotes,
+      );
     } else {
       _gameEngine.toggleNote(cellIndex, digit);
     }
     state = AsyncData(_gameEngine.currentState);
   }
 
-  void erase() {
-    if (board.selectedCell == null) return;
-    _gameEngine.erase(board.selectedCell!);
+  void erase([int? index]) {
+    if (index != null) {
+      _gameEngine.erase(index);
+    } else if (board.selectedCell != null) {
+      _gameEngine.erase(board.selectedCell!);
+    }
     state = AsyncData(_gameEngine.currentState);
   }
 
@@ -78,7 +89,8 @@ class GameNotifier extends AsyncNotifier<GameState?> {
   }
 
   void hint() {
-    _gameEngine.revealHint();
+    final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
+    _gameEngine.revealHint(autoRemoveNotes: autoRemoveNotes);
     state = AsyncData(_gameEngine.currentState);
   }
 

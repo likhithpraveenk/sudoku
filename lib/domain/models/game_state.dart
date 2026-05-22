@@ -1,5 +1,6 @@
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_action.dart';
+import 'package:sudoku/domain/models/game_assists.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 import 'package:sudoku/domain/models/utils.dart';
@@ -13,6 +14,7 @@ class GameState {
     required this.history,
     this.puzzleComplete = false,
     this.elapsed = Duration.zero,
+    this.assists = const GameAssists(),
   });
 
   final Puzzle puzzle;
@@ -22,6 +24,7 @@ class GameState {
   final List<GameAction> history;
   final bool puzzleComplete;
   final Duration elapsed;
+  final GameAssists assists;
 
   factory GameState.newGame({
     required Puzzle puzzle,
@@ -42,6 +45,7 @@ class GameState {
     List<GameAction>? history,
     bool? puzzleComplete,
     Duration? elapsed,
+    GameAssists? assists,
   }) => GameState(
     puzzle: puzzle ?? this.puzzle,
     difficulty: difficulty ?? this.difficulty,
@@ -50,6 +54,7 @@ class GameState {
     history: history ?? this.history,
     puzzleComplete: puzzleComplete ?? this.puzzleComplete,
     elapsed: elapsed ?? this.elapsed,
+    assists: assists ?? this.assists,
   );
 
   @override
@@ -61,6 +66,7 @@ class GameState {
     Object.hashAll(history),
     puzzleComplete,
     elapsed,
+    assists,
   );
 
   @override
@@ -73,5 +79,6 @@ class GameState {
           listEquals(notes, other.notes) &&
           listEquals(history, other.history) &&
           puzzleComplete == other.puzzleComplete &&
-          elapsed == other.elapsed;
+          elapsed == other.elapsed &&
+          assists == other.assists;
 }

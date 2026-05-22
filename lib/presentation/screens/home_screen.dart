@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/screens/game_screen.dart';
+import 'package:sudoku/presentation/screens/settings_screen.dart';
 import 'package:sudoku/presentation/widgets/difficulty_selector.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
 
@@ -50,11 +51,11 @@ class HomeScreen extends ConsumerWidget {
                           IconButton(
                             tooltip: 'Settings',
                             onPressed: () async {
-                              // await Navigator.of(context).push(
-                              //   MaterialPageRoute<void>(
-                              //     builder: (_) => const SettingsScreen(),
-                              //   ),
-                              // );
+                              await Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const SettingsScreen(),
+                                ),
+                              );
                             },
                             icon: const Icon(Icons.settings),
                           ),

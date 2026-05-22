@@ -18,7 +18,7 @@ class DigitPad extends ConsumerWidget {
     final boardNotifier = ref.read(boardProvider.notifier);
     final digitCounts = state.grid.digitCounts;
     final showRemaining = ref.watch(
-      settingsProvider.select((s) => s.showRemaining),
+      settingsProvider.select((s) => s.showRemainingCounts),
     );
 
     final buttons =
@@ -53,7 +53,16 @@ class DigitPad extends ConsumerWidget {
     return Padding(
       padding: const .symmetric(horizontal: 16),
       child: context.isExpanded
-          ? Wrap(spacing: 6, runSpacing: 6, children: buttons)
+          ? Column(
+              mainAxisSize: .min,
+              children: [
+                Row(spacing: 6, children: buttons.sublist(0, 3)),
+                const SizedBox(height: 6),
+                Row(spacing: 6, children: buttons.sublist(3, 6)),
+                const SizedBox(height: 6),
+                Row(spacing: 6, children: buttons.sublist(6)),
+              ],
+            )
           : Column(
               mainAxisSize: .min,
               children: [

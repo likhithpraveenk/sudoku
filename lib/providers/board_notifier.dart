@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/models/board_state.dart';
 
-final boardProvider = NotifierProvider(BoardNotifier.new);
+final boardProvider = NotifierProvider.autoDispose(BoardNotifier.new);
 
 class BoardNotifier extends Notifier<BoardState> {
   @override
@@ -30,6 +30,17 @@ class BoardNotifier extends Notifier<BoardState> {
 
   void setErrorCells(Set<int> errorCells) {
     final currentState = state;
+    state = state.copyWith(
+      errorCells: errorCells,
+      selectedCell: currentState.selectedCell,
+      selectedDigit: currentState.selectedDigit,
+    );
+  }
+
+  void removeErrorCell(int errorCell) {
+    final currentState = state;
+    final errorCells = Set<int>.from(currentState.errorCells)
+      ..remove(errorCell);
     state = state.copyWith(
       errorCells: errorCells,
       selectedCell: currentState.selectedCell,

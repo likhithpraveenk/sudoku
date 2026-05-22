@@ -21,7 +21,7 @@ class GameEngine {
     );
   }
 
-  void inputDigit(int cellIndex, int digit) {
+  void inputDigit(int cellIndex, int digit, {bool autoRemoveNotes = false}) {
     if (isGiven(_state, cellIndex)) return;
 
     final currentValue = getValue(_state, cellIndex);
@@ -36,15 +36,17 @@ class GameEngine {
     }
 
     final previousNotes = <int, Set<int>>{};
-    final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
+    previousNotes[cellIndex] = Set<int>.from(_state.notes[cellIndex]);
 
+    final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
     if (digit != 0) {
       for (final peerIndex in peersOf(cellIndex)) {
         previousNotes[peerIndex] = Set<int>.from(_state.notes[peerIndex]);
-        newNotes[peerIndex].remove(digit);
+        if (autoRemoveNotes) {
+          newNotes[peerIndex].remove(digit);
+        }
       }
     }
-    previousNotes[cellIndex] = Set<int>.from(_state.notes[cellIndex]);
     newNotes[cellIndex].clear();
 
     final action = DigitAction(
@@ -149,17 +151,21 @@ class GameEngine {
     }
   }
 
-  void revealHint() {
+  void revealHint({bool autoRemoveNotes = false}) {
     final result = firstEmptyOrWrong(
       _state.grid.values,
       _state.puzzle.solution.values,
     );
     if (result == null) return;
 
-    inputDigit(result.index, result.correct);
+    _state = _state.copyWith(assists: _state.assists.copyWith(hints: true));
+    inputDigit(result.index, result.correct, autoRemoveNotes: autoRemoveNotes);
   }
 
   Set<int> findErrors() {
+    _state = _state.copyWith(
+      assists: _state.assists.copyWith(validation: true),
+    );
     final errors = <int>{};
     for (var i = 0; i < 81; i++) {
       if (_state.grid.valueAt(i) != 0 &&
@@ -186,7 +192,7 @@ class GameEngine {
 
       return {1, 2, 3, 4, 5, 6, 7, 8, 9}..removeAll(used);
     });
-
+    _state = _state.copyWith(assists: _state.assists.copyWith(autoNotes: true));
     final action = AutoNotesAction(previousNotes: prevNotes);
     _state = _state.copyWith(
       notes: newNotes,

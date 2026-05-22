@@ -8,6 +8,7 @@ import 'package:sudoku/presentation/shared/breakpoints.dart';
 import 'package:sudoku/presentation/widgets/notes_grid.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 
 class GridWidget extends StatelessWidget {
   const GridWidget({required this.gameState, super.key});
@@ -24,21 +25,29 @@ class GridWidget extends StatelessWidget {
         : (availableHeight > 200 ? availableHeight : mq.width - 16);
     final size = maxGrid.clamp(0.0, mq.width - 16).clamp(0.0, 520.0);
 
-    return Center(
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 81,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 9,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Center(
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 81,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 9,
+              ),
+              itemBuilder: (_, index) {
+                return _Cell(
+                  index: index,
+                  gameState: gameState,
+                  size: size / 9,
+                );
+              },
+            ),
           ),
-          itemBuilder: (_, index) {
-            return _Cell(index: index, gameState: gameState, size: size / 9);
-          },
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -55,6 +64,10 @@ class _Cell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final highlightSameDigits = settings.highlightSameDigits;
+    final maskGivenCells = settings.maskGivenCells;
+
     final scheme = Theme.of(context).colorScheme;
     final board = ref.watch(boardProvider);
 
@@ -71,9 +84,6 @@ class _Cell extends ConsumerWidget {
             ? gameState.grid.valueAt(board.selectedCell!)
             : null);
 
-    final isSameDigit = activeDigit != 0 && activeDigit == value;
-    final hasNote = activeDigit != 0 && notes.contains(activeDigit);
-
     final r = index ~/ 9;
     final c = index % 9;
 
@@ -84,19 +94,37 @@ class _Cell extends ConsumerWidget {
       width: 1.6,
     );
 
+    final isSameDigit =
+        highlightSameDigits &&
+        activeDigit != null &&
+        activeDigit != 0 &&
+        activeDigit == value;
+    final hasNote =
+        highlightSameDigits &&
+        activeDigit != null &&
+        activeDigit != 0 &&
+        notes.contains(activeDigit);
+
     final tileColor = isGiven
-        ? (isSelected || isSameDigit ? scheme.primary : scheme.outlineVariant)
+        ? (isSelected || isSameDigit
+              ? scheme.primary
+              : maskGivenCells
+              ? scheme.outlineVariant
+              : scheme.surface)
         : (isSelected || isSameDigit || hasNote
               ? scheme.primary
               : scheme.surface);
 
-    final foreground = isGiven
+    final foreground = isGiven && maskGivenCells
         ? scheme.surface
         : (isSelected || isSameDigit ? scheme.surface : scheme.onSurface);
 
     return GestureDetector(
       onTap: () {
         unawaited(HapticFeedback.selectionClick());
+        if (isError) {
+          ref.read(boardProvider.notifier).removeErrorCell(index);
+        }
         if (board.selectedDigit != null) {
           ref
               .read(gameProvider.notifier)
@@ -104,6 +132,9 @@ class _Cell extends ConsumerWidget {
         } else {
           ref.read(boardProvider.notifier).selectCell(index);
         }
+      },
+      onLongPress: () {
+        ref.read(gameProvider.notifier).erase(index);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -116,7 +147,7 @@ class _Cell extends ConsumerWidget {
           padding: const .all(2),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: tileColor,
+              color: isError ? scheme.errorContainer : tileColor,
               borderRadius: .circular(6),
               border: .all(
                 width: 0.8,
@@ -130,7 +161,7 @@ class _Cell extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: size * 0.52,
                         fontWeight: .w500,
-                        color: isError ? scheme.error : foreground,
+                        color: isError ? scheme.onErrorContainer : foreground,
                       ),
                     ),
                   )

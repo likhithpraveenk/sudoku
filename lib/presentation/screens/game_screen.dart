@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/shared/breakpoints.dart';
@@ -9,7 +8,6 @@ import 'package:sudoku/presentation/widgets/game_layout.dart';
 import 'package:sudoku/presentation/widgets/grid_widget.dart';
 import 'package:sudoku/presentation/widgets/solved_overlay.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
-import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
@@ -22,8 +20,8 @@ class GameScreen extends ConsumerWidget {
     final showTimer = ref.watch(settingsProvider.select((s) => s.showTimer));
     final game = gameAsync.value;
 
-    final board = ref.watch(boardProvider);
-    final boardNotifier = ref.read(boardProvider.notifier);
+    // final board = ref.watch(boardProvider);
+    // final boardNotifier = ref.read(boardProvider.notifier);
     final gameNotifier = ref.read(gameProvider.notifier);
 
     return Scaffold(
@@ -43,7 +41,7 @@ class GameScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       FilledButton(
                         onPressed: () {
-                          gameNotifier.stopTimer();
+                          gameNotifier.saveGame();
                           Navigator.of(context).pop();
                         },
                         child: const Text('Start New Game'),
@@ -56,41 +54,44 @@ class GameScreen extends ConsumerWidget {
               return Focus(
                 autofocus: true,
                 onKeyEvent: (node, event) {
-                  if (event is! KeyDownEvent) return .ignored;
-                  final key = event.logicalKey;
-                  switch (key) {
-                    case .arrowLeft:
-                      boardNotifier.selectCell((board.selectedCell ?? 0) - 1);
-                      return .handled;
-                    case .arrowRight:
-                      boardNotifier.selectCell((board.selectedCell ?? 0) + 1);
-                      return .handled;
-                    case .arrowUp:
-                      boardNotifier.selectCell((board.selectedCell ?? 0) - 9);
-                      return .handled;
-                    case .arrowDown:
-                      boardNotifier.selectCell((board.selectedCell ?? 0) + 9);
-                      return .handled;
-                    case .backspace || .delete:
-                      gameNotifier.erase();
-                      return .handled;
-                    default:
-                  }
-                  if (key.keyLabel.length == 1) {
-                    final d = int.tryParse(key.keyLabel);
-                    if (d != null && d >= 1 && d <= 9) {
-                      boardNotifier.selectDigit(d);
-                      return .handled;
-                    }
-                  }
-                  if (key.keyLabel.toLowerCase() == 'p') {
-                    boardNotifier.toggleInputMode();
-                    return .handled;
-                  }
+                  // TODO: fix keyboard events
+                  // if (event is! KeyDownEvent) return .ignored;
+                  // final key = event.logicalKey;
+                  // switch (key) {
+                  //   case .arrowLeft:
+                  //     boardNotifier.selectCell((board.selectedCell ?? 0) - 1);
+                  //     return .handled;
+                  //   case .arrowRight:
+                  //     boardNotifier.selectCell((board.selectedCell ?? 0) + 1);
+                  //     return .handled;
+                  //   case .arrowUp:
+                  //     boardNotifier.selectCell((board.selectedCell ?? 0) - 9);
+                  //     return .handled;
+                  //   case .arrowDown:
+                  //     boardNotifier.selectCell((board.selectedCell ?? 0) + 9);
+                  //     return .handled;
+                  //   case .backspace || .delete:
+                  //     gameNotifier.erase();
+                  //     return .handled;
+                  //   default:
+                  // }
+                  // if (key.keyLabel.length == 1) {
+                  //   final d = int.tryParse(key.keyLabel);
+                  //   if (d != null && d >= 1 && d <= 9) {
+                  //     boardNotifier.selectDigit(d);
+                  //     return .handled;
+                  //   }
+                  // }
+                  // if (key.keyLabel.toLowerCase() == 'p') {
+                  //   boardNotifier.toggleInputMode();
+                  //   return .handled;
+                  // }
                   return .ignored;
                 },
+                // TODO: overlay should not replace game body
+                // TODO: on puzzle complete save stat
                 child: game.puzzleComplete
-                    ? SolvedOverlay(state: game, onBack: gameNotifier.stopTimer)
+                    ? SolvedOverlay(state: game, onBack: gameNotifier.saveGame)
                     : _GameBody(state: game),
               );
             },
@@ -106,7 +107,22 @@ class GameScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          const Positioned(top: 6, right: 6, child: ThemeSelector()),
+          Align(
+            alignment: .topLeft,
+            child: Padding(
+              padding: const .all(6),
+              child: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.chevron_left),
+              ),
+            ),
+          ),
+          const Align(
+            alignment: .topRight,
+            child: Padding(padding: .all(6), child: ThemeSelector()),
+          ),
         ],
       ),
     );
