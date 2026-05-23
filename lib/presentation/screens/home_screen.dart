@@ -11,7 +11,7 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
     final saved = ref.watch(continueGameProvider).value;
     final continueGame = ref.read(continueGameFlagProvider.notifier);
 
@@ -28,7 +28,18 @@ class HomeScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: .center,
                     children: [
-                      Text('Sudoku', style: textTheme.displaySmall),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: const .all(.circular(6)),
+                        ),
+                        child: Image.asset(
+                          'assets/icons/icon.png',
+                          width: 160,
+                          height: 160,
+                          color: theme.colorScheme.surface,
+                        ),
+                      ),
                       const SizedBox(height: 36),
                       const DifficultySelector(),
                       const SizedBox(height: 16),

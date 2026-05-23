@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const builtInThemes = [
+  ThemeConfig(seedColor: Color(0xFF1C0420)),
   ThemeConfig(seedColor: Color(0xFF7C5CBF)),
   ThemeConfig(seedColor: Color(0xFF5A8A6A)),
   ThemeConfig(seedColor: Color(0xFF4A6FA5)),
