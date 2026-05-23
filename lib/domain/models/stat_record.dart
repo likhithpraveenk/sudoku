@@ -48,4 +48,18 @@ class StatRecord {
     'usedValidation': usedValidation,
     'completedAt': completedAt.millisecondsSinceEpoch,
   };
+
+  String get assistsUsed {
+    final list = <String>[];
+    if (usedHints) {
+      list.add('Hint');
+    }
+    if (usedAutoNotes) {
+      list.add('Auto notes');
+    }
+    if (usedValidation) {
+      list.add('Validation');
+    }
+    return list.join(', ');
+  }
 }

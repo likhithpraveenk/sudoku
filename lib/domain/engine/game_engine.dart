@@ -197,4 +197,8 @@ class GameEngine {
       history: [..._state.history, action],
     );
   }
+
+  void restart() {
+    _state = _initialState.copyWith(elapsed: _state.elapsed);
+  }
 }

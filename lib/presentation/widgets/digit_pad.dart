@@ -33,6 +33,7 @@ class DigitPad extends ConsumerWidget {
             count: count,
             showCount: showRemaining,
             onTap: () {
+              if (state.puzzleComplete) return;
               if (board.selectedCell != null) {
                 gameNotifier.inputDigit(board.selectedCell!, digit);
               } else {

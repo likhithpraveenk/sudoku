@@ -29,7 +29,7 @@ const kTick = Duration(seconds: 1);
 class GameNotifier extends AsyncNotifier<GameState?> {
   late GameEngine _gameEngine;
   Timer? _timer;
-  StatRecord? lastRecord;
+  StatRecord? lastRecord; // TODO: riverpod anti-pattern find a better way
 
   BoardState get board => ref.read(boardProvider);
 
@@ -127,12 +127,7 @@ class GameNotifier extends AsyncNotifier<GameState?> {
   }
 
   void restart() {
-    final currentState = _gameEngine.currentState;
-    final newState = GameState.newGame(
-      puzzle: currentState.puzzle,
-      difficulty: currentState.difficulty,
-    );
-    _gameEngine = GameEngine(newState);
+    _gameEngine.restart();
     state = AsyncData(_gameEngine.currentState);
   }
 

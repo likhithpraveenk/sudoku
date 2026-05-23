@@ -11,28 +11,33 @@ class ActionRow extends ConsumerWidget {
     final board = ref.watch(boardProvider);
     final boardNotifier = ref.read(boardProvider.notifier);
     final gameNotifier = ref.read(gameProvider.notifier);
+    final isFinished = ref.watch(isFinishedProvider);
 
-    return Row(
-      spacing: 6,
-      mainAxisAlignment: .spaceEvenly,
-      children: [
-        _ActionButton(
-          icon: Icons.refresh_rounded,
-          onTap: () {
-            // TODO: alert dialog to restart game
-          },
-        ),
-        _ActionButton(
-          icon: Icons.lightbulb_outline_rounded,
-          onTap: () => _showMoreSheet(context, gameNotifier),
-        ),
-        _ActionButton(
-          icon: Icons.edit_outlined,
-          active: board.inputMode == .pencil,
-          onTap: boardNotifier.toggleInputMode,
-        ),
-        _ActionButton(icon: Icons.undo_rounded, onTap: gameNotifier.undo),
-      ],
+    return IgnorePointer(
+      ignoring: isFinished,
+      child: Row(
+        spacing: 6,
+        mainAxisAlignment: .spaceEvenly,
+        children: [
+          _ActionButton(
+            icon: Icons.refresh_rounded,
+            onTap: () {
+              gameNotifier.restart();
+              boardNotifier.reset();
+            },
+          ),
+          _ActionButton(
+            icon: Icons.lightbulb_outline_rounded,
+            onTap: () => _showMoreSheet(context, gameNotifier),
+          ),
+          _ActionButton(
+            icon: Icons.edit_outlined,
+            active: board.inputMode == .pencil,
+            onTap: boardNotifier.toggleInputMode,
+          ),
+          _ActionButton(icon: Icons.undo_rounded, onTap: gameNotifier.undo),
+        ],
+      ),
     );
   }
 
@@ -43,33 +48,39 @@ class ActionRow extends ConsumerWidget {
     await showModalBottomSheet<void>(
       context: context,
       builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.lightbulb_outline_rounded),
-              title: const Text('Hint'),
-              onTap: () {
-                Navigator.pop(ctx);
-                notifier.hint();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.check_circle_outline_rounded),
-              title: const Text('Check'),
-              onTap: () {
-                Navigator.pop(ctx);
-                notifier.runValidation();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.autorenew),
-              title: const Text('Auto Notes'),
-              onTap: () {
-                Navigator.pop(ctx);
-                notifier.applyAutoNotes();
-              },
-            ),
-          ],
+        child: Padding(
+          padding: const .only(bottom: 48, top: 24),
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              Text('Hints', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.lightbulb_outline_rounded),
+                title: const Text('Reveal a cell'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  notifier.hint();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.check_circle_outline_rounded),
+                title: const Text('Validate'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  notifier.runValidation();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.autorenew),
+                title: const Text('Auto fill all notes'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  notifier.applyAutoNotes();
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

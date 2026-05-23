@@ -82,8 +82,6 @@ final topStatsProvider =
       final clean = all.where((r) => r.isClean).toList()
         ..sort((a, b) => a.time.compareTo(b.time));
 
-      // TODO: separate assists?
-
       final assisted = all.where((r) => !r.isClean).toList()
         ..sort((a, b) => a.time.compareTo(b.time));
 

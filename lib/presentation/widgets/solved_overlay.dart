@@ -77,10 +77,10 @@ class SolvedOverlay extends StatelessWidget {
                 fontWeight: .bold,
               ),
             ),
-            if (!record.isClean) ...[
+            if (record.assistsUsed.isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(
-                'Assists Used', // TODO add assists
+                'Assists: ${record.assistsUsed}',
                 style: textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

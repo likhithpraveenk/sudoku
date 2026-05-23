@@ -25,29 +25,32 @@ class GridWidget extends StatelessWidget {
         : (availableHeight > 200 ? availableHeight : mq.width - 16);
     final size = maxGrid.clamp(0.0, mq.width - 16).clamp(0.0, 520.0);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Center(
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 81,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 9,
+    return IgnorePointer(
+      ignoring: gameState.puzzleComplete,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Center(
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 81,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 9,
+                ),
+                itemBuilder: (_, index) {
+                  return _Cell(
+                    index: index,
+                    gameState: gameState,
+                    size: size / 9,
+                  );
+                },
               ),
-              itemBuilder: (_, index) {
-                return _Cell(
-                  index: index,
-                  gameState: gameState,
-                  size: size / 9,
-                );
-              },
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

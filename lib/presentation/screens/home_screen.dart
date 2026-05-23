@@ -44,6 +44,7 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 36),
                       Wrap(
                         spacing: 8,
+                        alignment: .center,
                         children: Difficulty.values.map((d) {
                           final selected = d == difficulty;
                           return ChoiceChip(
@@ -52,47 +53,49 @@ class HomeScreen extends ConsumerWidget {
                             onSelected: (_) {
                               ref.read(difficultyProvider.notifier).set(d);
                             },
+                            visualDensity: .compact,
                           );
                         }).toList(),
                       ),
                       const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: () async {
-                            await ref
-                                .read(saveGameServiceProvider)
-                                .delete(difficulty);
-                            if (context.mounted) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const GameScreen(),
+                      Row(
+                        children: [
+                          if (continueGameMap[difficulty] != null) ...[
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => const GameScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Continue ${formatTime(continueGameMap[difficulty]!.elapsed)}',
                                 ),
-                              );
-                            }
-                          },
-                          child: const Text('New Game'),
-                        ),
-                      ),
-                      if (continueGameMap[difficulty] != null) ...[
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const GameScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              'Continue ${formatTime(continueGameMap[difficulty]!.elapsed)}',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () async {
+                                await ref
+                                    .read(saveGameServiceProvider)
+                                    .delete(difficulty);
+                                if (context.mounted) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => const GameScreen(),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('New Game'),
                             ),
                           ),
-                        ),
-                      ] else
-                        const SizedBox(height: 60), // TODO: layout this better
+                        ],
+                      ),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: .spaceEvenly,
