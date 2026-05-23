@@ -6,16 +6,22 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sudoku/data/hive_boxes.dart';
 import 'package:sudoku/presentation/models/theme_config.dart';
 
-final themeConfigProvider = NotifierProvider(ThemeNotifier.new);
+final themeConfigProvider = NotifierProvider(
+  ThemeNotifier.new,
+  name: 'themeConfigProvider',
+);
 
 final kShape = RoundedRectangleBorder(borderRadius: .circular(6));
 
-final customThemeProvider = NotifierProvider(CustomThemeNotifier.new);
+final customThemeProvider = NotifierProvider(
+  CustomThemeNotifier.new,
+  name: 'customThemeProvider',
+);
 
 final allThemesProvider = Provider((ref) {
   final custom = ref.watch(customThemeProvider);
   return [...builtInThemes, ...custom];
-});
+}, name: 'allThemesProvider');
 
 final currentThemeProvider = Provider((ref) {
   final config = ref.watch(themeConfigProvider);
@@ -43,7 +49,7 @@ final currentThemeProvider = Provider((ref) {
     ),
     chipTheme: ChipThemeData(shape: kShape),
   );
-});
+}, name: 'currentThemeProvider');
 
 class ThemeNotifier extends Notifier<ThemeConfig> {
   static const _key = 'theme_config';

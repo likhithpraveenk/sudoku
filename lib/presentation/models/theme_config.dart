@@ -41,4 +41,14 @@ class ThemeConfig {
 
   @override
   int get hashCode => Object.hash(seedColor, brightness);
+
+  @override
+  String toString() {
+    return 'ThemeConfig(${seedColor.toHex()}, ${brightness.name})';
+  }
+}
+
+extension ColorToHex on Color {
+  String toHex() =>
+      '#${(toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
 }

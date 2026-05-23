@@ -8,6 +8,7 @@ import 'package:sudoku/presentation/shared/grid_placement.dart';
 
 final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
   SettingsNotifier.new,
+  name: 'settingsProvider',
 );
 
 class SettingsNotifier extends Notifier<AppSettings> {

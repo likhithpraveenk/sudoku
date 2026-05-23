@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/models/board_state.dart';
 
-final boardProvider = NotifierProvider.autoDispose(BoardNotifier.new);
+final boardProvider = NotifierProvider.autoDispose(
+  BoardNotifier.new,
+  name: 'boardProvider',
+);
 
 class BoardNotifier extends Notifier<BoardState> {
   @override

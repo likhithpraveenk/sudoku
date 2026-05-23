@@ -14,14 +14,15 @@ import 'package:sudoku/providers/settings_provider.dart';
 final gameProvider =
     AsyncNotifierProvider.autoDispose<GameNotifier, GameState?>(
       GameNotifier.new,
+      name: 'gameProvider',
     );
 
-final isFinishedProvider = Provider((ref) {
+final isFinishedProvider = Provider.autoDispose((ref) {
   final puzzleComplete = ref.watch(
     gameProvider.select((s) => s.value?.puzzleComplete),
   );
   return puzzleComplete == true;
-});
+}, name: 'isFinishedProvider');
 
 class GameNotifier extends AsyncNotifier<GameState?> {
   late GameEngine _gameEngine;
