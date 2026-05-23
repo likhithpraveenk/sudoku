@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/stat_record.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/services_provider.dart';
 
-void showSolvedOverlay(BuildContext context, WidgetRef ref) {
-  final game = ref.read(gameProvider).value;
+void showSolvedOverlay(BuildContext context, WidgetRef ref, GameState game) {
   final record = ref.read(gameProvider.notifier).lastRecord;
-  if (game == null || !game.puzzleComplete || record == null) {
+  if (!game.puzzleComplete || record == null) {
     return;
   }
-  final top = ref.watch(topStatsProvider(game.difficulty));
+  final top = ref.read(topStatsProvider(game.difficulty));
   final list = record.isClean ? top.clean : top.assisted;
 
   final displayList = list.take(10).toList();

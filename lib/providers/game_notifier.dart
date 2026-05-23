@@ -24,6 +24,8 @@ final isFinishedProvider = Provider.autoDispose((ref) {
   return puzzleComplete == true;
 }, name: 'isFinishedProvider');
 
+const kTick = Duration(seconds: 1);
+
 class GameNotifier extends AsyncNotifier<GameState?> {
   late GameEngine _gameEngine;
   Timer? _timer;
@@ -34,7 +36,6 @@ class GameNotifier extends AsyncNotifier<GameState?> {
   @override
   Future<GameState?> build() async {
     final saveGameService = ref.read(saveGameServiceProvider);
-    final container = ref.container;
     ref.onDispose(() {
       _timer?.cancel();
       final current = _gameEngine.currentState;
@@ -43,18 +44,11 @@ class GameNotifier extends AsyncNotifier<GameState?> {
       } else {
         saveGameService.save(current);
       }
-      Future.microtask(() {
-        container.invalidate(continueGameProvider);
-      });
     });
 
     final difficulty = ref.read(difficultyProvider);
-    final continueGame = ref.read(continueGameFlagProvider);
-
-    final initialState = continueGame
-        ? ref.read(saveGameServiceProvider).load(difficulty) ??
-              await _generateNew(difficulty)
-        : await _generateNew(difficulty);
+    final saved = saveGameService.load(difficulty);
+    final initialState = saved ?? await _generateNew(difficulty);
 
     _gameEngine = GameEngine(initialState);
     _startTimer();
@@ -69,8 +63,8 @@ class GameNotifier extends AsyncNotifier<GameState?> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _gameEngine.tick();
+    _timer = Timer.periodic(kTick, (_) {
+      _gameEngine.tick(kTick);
       state = AsyncData(_gameEngine.currentState);
     });
   }

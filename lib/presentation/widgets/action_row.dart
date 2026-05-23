@@ -31,10 +31,7 @@ class ActionRow extends ConsumerWidget {
           active: board.inputMode == .pencil,
           onTap: boardNotifier.toggleInputMode,
         ),
-        _ActionButton(
-          icon: Icons.undo_rounded,
-          onTap: gameNotifier.canUndo ? gameNotifier.undo : null,
-        ),
+        _ActionButton(icon: Icons.undo_rounded, onTap: gameNotifier.undo),
       ],
     );
   }

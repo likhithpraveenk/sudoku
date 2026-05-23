@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/presentation/screens/game_screen.dart';
 import 'package:sudoku/presentation/screens/settings_screen.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
-import 'package:sudoku/presentation/widgets/difficulty_selector.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
+import 'package:sudoku/providers/difficulty_provider.dart';
 import 'package:sudoku/providers/services_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -12,8 +13,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final saved = ref.watch(continueGameProvider).value;
-    final continueGame = ref.read(continueGameFlagProvider.notifier);
+    final continueGameMap = ref.watch(continueGameProvider);
+    final difficulty = ref.watch(difficultyProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -41,14 +42,44 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 36),
-                      const DifficultySelector(),
-                      const SizedBox(height: 16),
-                      if (saved != null) ...[
+                      Wrap(
+                        spacing: 8,
+                        children: Difficulty.values.map((d) {
+                          final selected = d == difficulty;
+                          return ChoiceChip(
+                            label: Text(d.displayName),
+                            selected: selected,
+                            onSelected: (_) {
+                              ref.read(difficultyProvider.notifier).set(d);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () async {
+                            await ref
+                                .read(saveGameServiceProvider)
+                                .delete(difficulty);
+                            if (context.mounted) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const GameScreen(),
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text('New Game'),
+                        ),
+                      ),
+                      if (continueGameMap[difficulty] != null) ...[
+                        const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton(
                             onPressed: () {
-                              continueGame.state = true;
                               Navigator.of(context).push(
                                 MaterialPageRoute<void>(
                                   builder: (_) => const GameScreen(),
@@ -56,26 +87,12 @@ class HomeScreen extends ConsumerWidget {
                               );
                             },
                             child: Text(
-                              'Continue ${formatTime(saved.elapsed)}',
+                              'Continue ${formatTime(continueGameMap[difficulty]!.elapsed)}',
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: () {
-                            continueGame.state = false;
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const GameScreen(),
-                              ),
-                            );
-                          },
-                          child: const Text('New Game'),
-                        ),
-                      ),
+                      ] else
+                        const SizedBox(height: 60), // TODO: layout this better
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: .spaceEvenly,

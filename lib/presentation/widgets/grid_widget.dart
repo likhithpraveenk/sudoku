@@ -87,10 +87,10 @@ class _Cell extends ConsumerWidget {
     final r = index ~/ 9;
     final c = index % 9;
 
-    final thin = BorderSide(color: scheme.outlineVariant, width: 0.7);
+    final thin = BorderSide(color: scheme.outlineVariant, width: 0.8);
 
     final thick = BorderSide(
-      color: scheme.onSurface.withValues(alpha: 0.45),
+      color: scheme.onSurface.withValues(alpha: 0.8),
       width: 1.6,
     );
 

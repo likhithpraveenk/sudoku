@@ -3,6 +3,7 @@ import 'package:sudoku/domain/engine/game_engine.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
+import 'package:sudoku/providers/game_notifier.dart';
 
 import '../../helpers/sudoku_grids.dart';
 
@@ -24,20 +25,20 @@ void main() {
         final engine = _makeEngine();
         expect(engine.currentState.elapsed, Duration.zero);
 
-        engine.tick();
+        engine.tick(kTick);
 
-        expect(engine.currentState.elapsed, const Duration(seconds: 1));
+        expect(engine.currentState.elapsed, kTick);
       });
 
       test('accumulates across multiple ticks', () {
         final engine = _makeEngine();
 
         engine
-          ..tick()
-          ..tick()
-          ..tick();
+          ..tick(kTick)
+          ..tick(kTick)
+          ..tick(kTick);
 
-        expect(engine.currentState.elapsed, const Duration(seconds: 3));
+        expect(engine.currentState.elapsed, kTick * 3);
       });
     });
 

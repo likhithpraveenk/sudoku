@@ -123,4 +123,10 @@ class GameState {
       'validation': assists.validation,
     },
   };
+
+  @override
+  String toString() {
+    return 'GameState(${difficulty.displayName}, '
+        'elapsed: ${elapsed.inSeconds})';
+  }
 }

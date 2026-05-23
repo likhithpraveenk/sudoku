@@ -88,7 +88,6 @@ class GameScreen extends ConsumerWidget {
                     // }
                     return .ignored;
                   },
-                  // TODO: overlay should not replace game body
                   child: _GameBody(state: game),
                 );
               },
@@ -135,7 +134,8 @@ class _GameBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(isFinishedProvider, (_, next) {
       if (next) {
-        showSolvedOverlay(context, ref);
+        // TODO: after puzzle complete should not interact with game anymore
+        showSolvedOverlay(context, ref, state);
       }
     });
 

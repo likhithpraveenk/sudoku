@@ -15,10 +15,8 @@ class GameEngine {
 
   bool get canUndo => _state.history.isNotEmpty;
 
-  void tick() {
-    _state = _state.copyWith(
-      elapsed: _state.elapsed + const Duration(seconds: 1),
-    );
+  void tick(Duration duration) {
+    _state = _state.copyWith(elapsed: _state.elapsed + duration);
   }
 
   void inputDigit(int cellIndex, int digit, {bool autoRemoveNotes = false}) {
