@@ -1,8 +1,18 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile: File? = rootProject.file("key.properties")
+if (keystorePropertiesFile?.exists() ?: false) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -20,22 +30,50 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.likhithpraveenk.sudoku"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = System.getenv("KEY_ALIAS") ?: (keystoreProperties["keyAlias"] as String?)
+            keyPassword =
+                System.getenv("KEY_PASSWORD") ?: (keystoreProperties["keyPassword"] as String?)
+            storePassword =
+                System.getenv("STORE_PASSWORD") ?: (keystoreProperties["storePassword"] as String?)
+            val keystorePath =
+                System.getenv("KEYSTORE_PATH") ?: (keystoreProperties["storeFile"] as String?)
+            storeFile = keystorePath?.let { file(it) }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = when {
+                System.getenv("KEY_ALIAS") != null -> signingConfigs.getByName("release")
+                keystorePropertiesFile?.exists() == true -> signingConfigs.getByName("release")
+                else -> {
+                    println("WARNING: No signing credentials found. Building unsigned apk")
+                    null
+                }
+            }
+        }
+        debug {
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 }
 
