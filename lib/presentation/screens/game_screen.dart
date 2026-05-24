@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,10 +162,6 @@ class _GameBodyState extends ConsumerState<_GameBody>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == .paused || state == .detached) {
-      // Future.microtask((){
-
-      // });
-      log('saving now');
       ref.read(saveGameServiceProvider).save(widget.state);
     }
   }
@@ -183,7 +177,6 @@ class _GameBodyState extends ConsumerState<_GameBody>
     });
 
     final isExpanded = context.isExpanded;
-    final settings = ref.watch(settingsProvider);
 
     final grid = GridWidget(gameState: widget.state);
     const action = ActionRow();
@@ -192,15 +185,9 @@ class _GameBodyState extends ConsumerState<_GameBody>
     final base = isExpanded
         ? GameLayoutParams.desktop
         : GameLayoutParams.mobile;
-    final params = base.copyWith(
-      gridWidth: settings.gridWidth,
-      horizontalSpacing: settings.horizontalSpacing,
-      verticalSpacing: settings.verticalSpacing,
-      placement: settings.placement,
-    );
 
     return GameLayout(
-      params: params,
+      params: base,
       grid: grid,
       actionRow: action,
       digitPad: digits,

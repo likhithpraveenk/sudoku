@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/shared/breakpoints.dart';
-import 'package:sudoku/presentation/widgets/notes_grid.dart';
+import 'package:sudoku/presentation/widgets/sudoku_cell.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/settings_provider.dart';
@@ -71,7 +71,6 @@ class _Cell extends ConsumerWidget {
     final highlightSameDigits = settings.highlightSameDigits;
     final maskGivenCells = settings.maskGivenCells;
 
-    final scheme = Theme.of(context).colorScheme;
     final board = ref.watch(boardProvider);
 
     final isSelected = board.selectedCell == index;
@@ -87,16 +86,6 @@ class _Cell extends ConsumerWidget {
             ? gameState.grid.valueAt(board.selectedCell!)
             : null);
 
-    final r = index ~/ 9;
-    final c = index % 9;
-
-    final thin = BorderSide(color: scheme.outlineVariant, width: 0.8);
-
-    final thick = BorderSide(
-      color: scheme.onSurface.withValues(alpha: 0.8),
-      width: 1.6,
-    );
-
     final isSameDigit =
         highlightSameDigits &&
         activeDigit != null &&
@@ -107,20 +96,6 @@ class _Cell extends ConsumerWidget {
         activeDigit != null &&
         activeDigit != 0 &&
         notes.contains(activeDigit);
-
-    final tileColor = isGiven
-        ? (isSelected || isSameDigit
-              ? scheme.primary
-              : maskGivenCells
-              ? scheme.outlineVariant
-              : scheme.surface)
-        : (isSelected || isSameDigit || hasNote
-              ? scheme.primary
-              : scheme.surface);
-
-    final foreground = isGiven && maskGivenCells
-        ? scheme.surface
-        : (isSelected || isSameDigit ? scheme.surface : scheme.onSurface);
 
     return GestureDetector(
       onTap: () {
@@ -139,47 +114,17 @@ class _Cell extends ConsumerWidget {
       onLongPress: () {
         ref.read(gameProvider.notifier).erase(index);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: r == 0 ? .none : (r % 3 == 0 ? thick : thin),
-            left: c == 0 ? .none : (c % 3 == 0 ? thick : thin),
-          ),
-        ),
-        child: Padding(
-          padding: const .all(2),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: isError ? scheme.errorContainer : tileColor,
-              borderRadius: .circular(6),
-              border: .all(
-                width: 0.8,
-                color: isSelected ? scheme.errorContainer : Colors.transparent,
-              ),
-            ),
-            child: value != 0
-                ? Center(
-                    child: Text(
-                      '$value',
-                      style: TextStyle(
-                        fontSize: size * 0.52,
-                        fontWeight: .w500,
-                        color: isError ? scheme.onErrorContainer : foreground,
-                      ),
-                    ),
-                  )
-                : notes.isNotEmpty
-                ? Padding(
-                    padding: const .all(2),
-                    child: NotesGrid(
-                      notes: notes,
-                      cellSize: size,
-                      hasNoteOfSameDigit: hasNote || isSelected,
-                    ),
-                  )
-                : null,
-          ),
-        ),
+      child: SudokuCell(
+        index: index,
+        size: size,
+        value: value,
+        notes: notes,
+        isGiven: isGiven,
+        isSelected: isSelected,
+        isError: isError,
+        isSameDigit: isSameDigit,
+        hasNoteOfSameDigit: hasNote || isSelected,
+        maskGivenCells: maskGivenCells,
       ),
     );
   }

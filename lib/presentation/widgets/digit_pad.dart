@@ -27,7 +27,7 @@ class DigitPad extends ConsumerWidget {
           final isActive = board.selectedDigit == digit;
           final count = digitCounts[digit] ?? 0;
 
-          return _DigitButton(
+          return DigitButton(
             digit: '$digit',
             active: isActive,
             count: count,
@@ -42,7 +42,7 @@ class DigitPad extends ConsumerWidget {
             },
           );
         })..add(
-          _DigitButton(
+          DigitButton(
             digit: 'X',
             active: false,
             count: 9,
@@ -67,19 +67,22 @@ class DigitPad extends ConsumerWidget {
   }
 }
 
-class _DigitButton extends StatelessWidget {
-  const _DigitButton({
+class DigitButton extends StatelessWidget {
+  const DigitButton({
     required this.digit,
     required this.active,
     required this.count,
     this.showCount = true,
     required this.onTap,
+    this.size = 48.0,
+    super.key,
   });
   final String digit;
   final bool active;
   final int count;
   final bool showCount;
   final VoidCallback onTap;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +91,12 @@ class _DigitButton extends StatelessWidget {
         ? (count < 9 ? '${9 - count}' : '+${count - 9}')
         : null;
 
+    final badgeFont = size * 0.2;
+    final badgeOffset = size * 0.08;
+
     return Container(
-      height: 48,
-      width: 48,
+      height: size,
+      width: size,
       decoration: BoxDecoration(
         color: active ? scheme.primary : Colors.transparent,
         borderRadius: .circular(6),
@@ -106,21 +112,22 @@ class _DigitButton extends StatelessWidget {
             Center(
               child: Text(
                 digit,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  fontSize: size * 0.48,
+                  fontWeight: .w600,
                   color: active ? scheme.surface : scheme.onSurface,
                 ),
               ),
             ),
             if (remaining != null)
               Positioned(
-                bottom: 4,
-                right: 4,
+                bottom: badgeOffset,
+                right: badgeOffset,
                 child: Text(
                   remaining,
                   style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
+                    fontSize: badgeFont,
+                    fontWeight: .w400,
                     color: active ? scheme.surface : scheme.onSurface,
                     height: 1,
                   ),

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:sudoku/data/hive_boxes.dart';
 import 'package:sudoku/presentation/models/app_settings.dart';
-import 'package:sudoku/presentation/shared/grid_placement.dart';
 
 final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(
   SettingsNotifier.new,
@@ -26,29 +25,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
     return AppSettings.fromJson(jsonDecode(json) as Map<String, dynamic>);
   }
 
-  Future<void> update({
-    bool? showRemainingCounts,
-    bool? showTimer,
-    bool? maskGivenCells,
-    bool? autoRemoveNotes,
-    bool? highlightSameDigits,
-    double? gridWidth,
-    double? horizontalSpacing,
-    double? verticalSpacing,
-    GridPlacement? placement,
-  }) async {
-    state = state.copyWith(
-      showRemainingCounts: showRemainingCounts,
-      showTimer: showTimer,
-      maskGivenCells: maskGivenCells,
-      autoRemoveNotes: autoRemoveNotes,
-      highlightSameDigits: highlightSameDigits,
-      gridWidth: gridWidth,
-      horizontalSpacing: horizontalSpacing,
-      verticalSpacing: verticalSpacing,
-      placement: placement,
-    );
-
+  Future<void> update(AppSettings Function(AppSettings state) builder) async {
+    state = builder(state);
     await _persist();
   }
 

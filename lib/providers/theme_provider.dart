@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sudoku/data/hive_boxes.dart';
 import 'package:sudoku/presentation/models/theme_config.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 
 final themeConfigProvider = NotifierProvider(
   ThemeNotifier.new,
@@ -25,12 +26,22 @@ final allThemesProvider = Provider((ref) {
 
 final currentThemeProvider = Provider((ref) {
   final config = ref.watch(themeConfigProvider);
+  final trueBlack = ref.watch(settingsProvider.select((s) => s.trueBlackMode));
+  final schemeVariant = ref.watch(
+    settingsProvider.select((s) => s.schemeVariant),
+  );
+
+  ColorScheme colorScheme = ColorScheme.fromSeed(
+    seedColor: config.seedColor,
+    brightness: config.brightness,
+    dynamicSchemeVariant: schemeVariant,
+  );
+  if (trueBlack) {
+    colorScheme = colorScheme.copyWith(surface: Colors.black);
+  }
 
   return ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: config.seedColor,
-      brightness: config.brightness,
-    ),
+    colorScheme: colorScheme,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(shape: kShape),
     ),

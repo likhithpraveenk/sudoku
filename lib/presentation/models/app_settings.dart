@@ -1,4 +1,4 @@
-import 'package:sudoku/presentation/shared/grid_placement.dart';
+import 'package:flutter/material.dart';
 
 class AppSettings {
   const AppSettings({
@@ -7,10 +7,8 @@ class AppSettings {
     this.maskGivenCells = true,
     this.autoRemoveNotes = true,
     this.highlightSameDigits = true,
-    this.gridWidth = 360,
-    this.horizontalSpacing = 16,
-    this.verticalSpacing = 24,
-    this.placement = .top,
+    this.trueBlackMode = false,
+    this.schemeVariant = .tonalSpot,
   });
 
   final bool showRemainingCounts;
@@ -18,10 +16,8 @@ class AppSettings {
   final bool maskGivenCells;
   final bool autoRemoveNotes;
   final bool highlightSameDigits;
-  final double gridWidth;
-  final double horizontalSpacing;
-  final double verticalSpacing;
-  final GridPlacement placement;
+  final bool trueBlackMode;
+  final DynamicSchemeVariant schemeVariant;
 
   AppSettings copyWith({
     bool? showRemainingCounts,
@@ -29,20 +25,16 @@ class AppSettings {
     bool? maskGivenCells,
     bool? autoRemoveNotes,
     bool? highlightSameDigits,
-    double? gridWidth,
-    double? horizontalSpacing,
-    double? verticalSpacing,
-    GridPlacement? placement,
+    bool? trueBlackMode,
+    DynamicSchemeVariant? schemeVariant,
   }) => AppSettings(
     showRemainingCounts: showRemainingCounts ?? this.showRemainingCounts,
     showTimer: showTimer ?? this.showTimer,
     maskGivenCells: maskGivenCells ?? this.maskGivenCells,
     autoRemoveNotes: autoRemoveNotes ?? this.autoRemoveNotes,
     highlightSameDigits: highlightSameDigits ?? this.highlightSameDigits,
-    gridWidth: gridWidth ?? this.gridWidth,
-    horizontalSpacing: horizontalSpacing ?? this.horizontalSpacing,
-    verticalSpacing: verticalSpacing ?? this.verticalSpacing,
-    placement: placement ?? this.placement,
+    trueBlackMode: trueBlackMode ?? this.trueBlackMode,
+    schemeVariant: schemeVariant ?? this.schemeVariant,
   );
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -51,11 +43,9 @@ class AppSettings {
     maskGivenCells: json['maskGivenCells'] as bool,
     autoRemoveNotes: json['autoRemoveNotes'] as bool,
     highlightSameDigits: json['highlightSameDigits'] as bool,
-    gridWidth: (json['gridWidth'] as num).toDouble(),
-    horizontalSpacing: (json['horizontalSpacing'] as num).toDouble(),
-    verticalSpacing: (json['verticalSpacing'] as num).toDouble(),
-    placement: GridPlacement.values.firstWhere(
-      (e) => e.name == json['placement'],
+    trueBlackMode: json['trueBlackMode'] as bool,
+    schemeVariant: DynamicSchemeVariant.values.firstWhere(
+      (v) => v.name == json['schemeVariant'],
     ),
   );
 
@@ -65,38 +55,9 @@ class AppSettings {
     'maskGivenCells': maskGivenCells,
     'autoRemoveNotes': autoRemoveNotes,
     'highlightSameDigits': highlightSameDigits,
-    'gridWidth': gridWidth,
-    'horizontalSpacing': horizontalSpacing,
-    'verticalSpacing': verticalSpacing,
-    'placement': placement.name,
+    'trueBlackMode': trueBlackMode,
+    'schemeVariant': schemeVariant.name,
   };
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AppSettings &&
-          other.showRemainingCounts == showRemainingCounts &&
-          other.showTimer == showTimer &&
-          other.maskGivenCells == maskGivenCells &&
-          other.autoRemoveNotes == autoRemoveNotes &&
-          other.highlightSameDigits == highlightSameDigits &&
-          other.gridWidth == gridWidth &&
-          other.horizontalSpacing == horizontalSpacing &&
-          other.verticalSpacing == verticalSpacing &&
-          other.placement == placement;
-
-  @override
-  int get hashCode => Object.hash(
-    showRemainingCounts,
-    showTimer,
-    maskGivenCells,
-    autoRemoveNotes,
-    highlightSameDigits,
-    gridWidth,
-    horizontalSpacing,
-    verticalSpacing,
-    placement,
-  );
 
   @override
   String toString() {
