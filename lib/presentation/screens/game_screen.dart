@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +14,7 @@ import 'package:sudoku/presentation/widgets/solved_overlay.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
 class GameScreen extends ConsumerWidget {
@@ -136,20 +139,45 @@ class GameScreen extends ConsumerWidget {
   }
 }
 
-class _GameBody extends ConsumerWidget {
+class _GameBody extends ConsumerStatefulWidget {
   const _GameBody({required this.state});
   final GameState state;
 
-  // TODO: save game on app life cycle paused and on detached
-  // ref.read(saveGameServiceProvider).save(state) or .delete(difficulty)
-  // based on state.puzzleComplete
+  @override
+  ConsumerState<_GameBody> createState() => _GameBodyState();
+}
+
+class _GameBodyState extends ConsumerState<_GameBody>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == .paused || state == .detached) {
+      // Future.microtask((){
+
+      // });
+      log('saving now');
+      ref.read(saveGameServiceProvider).save(widget.state);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen(isFinishedProvider, (_, next) {
       if (next) {
         // TODO: not showing up. fix when lastRecord is removed in game notifier
-        showSolvedOverlay(context, ref, state);
+        showSolvedOverlay(context, ref, widget.state);
         ref.read(boardProvider.notifier).reset();
       }
     });
@@ -157,9 +185,9 @@ class _GameBody extends ConsumerWidget {
     final isExpanded = context.isExpanded;
     final settings = ref.watch(settingsProvider);
 
-    final grid = GridWidget(gameState: state);
+    final grid = GridWidget(gameState: widget.state);
     const action = ActionRow();
-    final digits = DigitPad(state: state);
+    final digits = DigitPad(state: widget.state);
 
     final base = isExpanded
         ? GameLayoutParams.desktop

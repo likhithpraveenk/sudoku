@@ -50,6 +50,7 @@ class BoardNotifier extends Notifier<BoardState> {
       selectedDigit: currentState.selectedDigit,
     );
   }
+
   void reset() {
     state = const BoardState();
   }

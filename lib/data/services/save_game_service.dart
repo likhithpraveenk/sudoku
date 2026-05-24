@@ -21,6 +21,4 @@ class SaveGameService {
   }
 
   Future<void> delete(Difficulty difficulty) => _box.delete(difficulty.name);
-
-  bool hasSavedGame(Difficulty difficulty) => _box.containsKey(difficulty.name);
 }

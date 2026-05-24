@@ -27,9 +27,6 @@ class FakeSaveGameService implements SaveGameService {
     _store.remove(difficulty);
   }
 
-  @override
-  bool hasSavedGame(Difficulty difficulty) => _store[difficulty] != null;
-
   GameState? savedFor(Difficulty difficulty) => _store[difficulty];
 }
 
