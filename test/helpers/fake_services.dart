@@ -1,5 +1,4 @@
 import 'package:sudoku/data/services/save_game_service.dart';
-import 'package:sudoku/data/services/stats_service.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/stat_record.dart';
@@ -30,22 +29,21 @@ class FakeSaveGameService implements SaveGameService {
   GameState? savedFor(Difficulty difficulty) => _store[difficulty];
 }
 
-class FakeStatsService implements StatsService {
+class FakeStatsService {
   final Map<Difficulty, List<StatRecord>> _store = {};
   int saveCalls = 0;
 
-  @override
   List<StatRecord> getAll(Difficulty difficulty) =>
       List<StatRecord>.from(_store[difficulty] ?? const []);
 
-  @override
   Future<void> save(StatRecord record) async {
     saveCalls++;
     (_store[record.difficulty] ??= <StatRecord>[]).add(record);
   }
 
-  @override
   Future<void> reset() async => _store.clear();
+
+  Map<Difficulty, List<StatRecord>> get seed => Map.unmodifiable(_store);
 }
 
 class FakeDifficultyNotifier extends DifficultyProvider {

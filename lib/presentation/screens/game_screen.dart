@@ -14,6 +14,7 @@ import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
+import 'package:sudoku/providers/stats_provider.dart';
 
 class GameScreen extends ConsumerWidget {
   const GameScreen({super.key});
@@ -89,7 +90,11 @@ class GameScreen extends ConsumerWidget {
                     if (key.keyLabel.length == 1) {
                       final d = int.tryParse(key.keyLabel);
                       if (d != null && d >= 1 && d <= 9) {
-                        boardNotifier.selectDigit(d);
+                        if (board.selectedCell != null) {
+                          gameNotifier.inputDigit(board.selectedCell!, d);
+                        } else {
+                          boardNotifier.selectDigit(d);
+                        }
                         return .handled;
                       }
                     }
@@ -170,8 +175,10 @@ class _GameBodyState extends ConsumerState<_GameBody>
   Widget build(BuildContext context) {
     ref.listen(isFinishedProvider, (_, next) {
       if (next) {
-        // TODO: not showing up. fix when lastRecord is removed in game notifier
-        showSolvedOverlay(context, ref, widget.state);
+        final record = ref.read(lastCompletionRecordProvider);
+        if (record != null) {
+          showSolvedOverlay(context, ref, record);
+        }
         ref.read(boardProvider.notifier).reset();
       }
     });

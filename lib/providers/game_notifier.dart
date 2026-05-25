@@ -10,6 +10,7 @@ import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
 import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
+import 'package:sudoku/providers/stats_provider.dart';
 
 final gameProvider =
     AsyncNotifierProvider.autoDispose<GameNotifier, GameState?>(
@@ -29,8 +30,6 @@ const kTick = Duration(seconds: 1);
 class GameNotifier extends AsyncNotifier<GameState?> {
   late GameEngine _gameEngine;
   Timer? _timer;
-  StatRecord? lastRecord; // TODO: riverpod anti-pattern find a better way
-
   BoardState get board => ref.read(boardProvider);
 
   @override
@@ -82,7 +81,7 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     }
     state = AsyncData(_gameEngine.currentState);
     if (_gameEngine.currentState.puzzleComplete) {
-      _onPuzzleComplete(_gameEngine.currentState);
+      _onPuzzleComplete();
     }
   }
 
@@ -105,14 +104,16 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     _gameEngine.revealHint(autoRemoveNotes: autoRemoveNotes);
     state = AsyncData(_gameEngine.currentState);
     if (_gameEngine.currentState.puzzleComplete) {
-      _onPuzzleComplete(_gameEngine.currentState);
+      _onPuzzleComplete();
     }
   }
 
-  void _onPuzzleComplete(GameState completed) {
+  void _onPuzzleComplete() {
     _timer?.cancel();
-    lastRecord = StatRecord.fromGameState(completed);
-    ref.read(statsServiceProvider).save(lastRecord!);
+    final completed = _gameEngine.currentState;
+    final record = StatRecord.fromGameState(completed);
+    ref.read(lastCompletionRecordProvider.notifier).state = record;
+    ref.read(statsNotifierProvider.notifier).add(record);
   }
 
   void runValidation() {

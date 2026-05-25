@@ -62,4 +62,7 @@ class StatRecord {
     }
     return list.join(', ');
   }
+
+  @override
+  String toString() => toJson().toString();
 }

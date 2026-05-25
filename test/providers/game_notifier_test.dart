@@ -48,7 +48,6 @@ class MockPuzzleGeneratorService implements PuzzleGeneratorService {
 ProviderContainer _makeContainer({
   AppSettings settings = const AppSettings(),
   FakeSaveGameService? saveGameService,
-  FakeStatsService? statsService,
   Difficulty difficulty = Difficulty.easy,
 }) {
   return ProviderContainer(
@@ -60,8 +59,6 @@ ProviderContainer _makeContainer({
       saveGameServiceProvider.overrideWithValue(
         saveGameService ?? FakeSaveGameService(),
       ),
-      if (statsService != null)
-        statsServiceProvider.overrideWithValue(statsService),
       difficultyProvider.overrideWith(() => FakeDifficultyNotifier(difficulty)),
     ],
   );

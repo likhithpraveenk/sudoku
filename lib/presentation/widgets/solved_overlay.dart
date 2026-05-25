@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/stat_record.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
-import 'package:sudoku/providers/game_notifier.dart';
-import 'package:sudoku/providers/services_provider.dart';
+import 'package:sudoku/providers/stats_provider.dart';
 
-void showSolvedOverlay(BuildContext context, WidgetRef ref, GameState game) {
-  final record = ref.read(gameProvider.notifier).lastRecord;
-  if (!game.puzzleComplete || record == null) {
-    return;
-  }
-  final top = ref.read(topStatsProvider(game.difficulty));
-  final list = record.isClean ? top.clean : top.assisted;
+void showSolvedOverlay(BuildContext context, WidgetRef ref, StatRecord record) {
+  final all = ref.read(statsProvider(record.difficulty));
+  final fullList =
+      (record.isClean
+              ? all.where((r) => r.isClean)
+              : all.where((r) => !r.isClean))
+          .toList()
+        ..sort((a, b) => a.time.compareTo(b.time));
 
-  final displayList = list.take(10).toList();
-  final currentRecordIndex = list.indexWhere(
-    (item) => item.completedAt == record.completedAt,
+  final currentRecordIndex = fullList.indexWhere(
+    (item) =>
+        item.completedAt.millisecondsSinceEpoch ==
+        record.completedAt.millisecondsSinceEpoch,
   );
-  final isRecordInTop10 = currentRecordIndex >= 0 && currentRecordIndex < 10;
 
+  final displayList = fullList.take(10).toList();
+  final isRecordInTop10 = currentRecordIndex >= 0 && currentRecordIndex < 10;
   if (!isRecordInTop10 && currentRecordIndex != -1) {
     displayList.add(record);
   }
@@ -27,11 +28,9 @@ void showSolvedOverlay(BuildContext context, WidgetRef ref, GameState game) {
   showDialog(
     context: context,
     builder: (context) {
-      final scheme = Theme.of(context).colorScheme;
-
       return Dialog(
-        backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: .circular(12)),
         child: SolvedOverlay(
           currentRecordIndex: currentRecordIndex,
           record: record,
@@ -94,7 +93,8 @@ class SolvedOverlay extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = displayList[index];
                   final isCurrentRecord =
-                      item.completedAt == record.completedAt;
+                      item.completedAt.millisecondsSinceEpoch ==
+                      record.completedAt.millisecondsSinceEpoch;
                   final trueRank = isCurrentRecord
                       ? currentRecordIndex + 1
                       : index + 1;
