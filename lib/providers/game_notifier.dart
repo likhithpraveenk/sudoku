@@ -28,7 +28,7 @@ final isFinishedProvider = Provider.autoDispose((ref) {
 const kTick = Duration(seconds: 1);
 
 class GameNotifier extends AsyncNotifier<GameState?> {
-  late GameEngine _gameEngine;
+  GameEngine? _gameEngine;
   Timer? _timer;
   BoardState get board => ref.read(boardProvider);
 
@@ -37,11 +37,14 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     final saveGameService = ref.read(saveGameServiceProvider);
     ref.onDispose(() {
       _timer?.cancel();
-      final current = _gameEngine.currentState;
-      if (current.puzzleComplete) {
-        saveGameService.delete(current.difficulty);
-      } else {
-        saveGameService.save(current);
+      final engine = _gameEngine;
+      if (engine != null) {
+        final current = engine.currentState;
+        if (current.puzzleComplete) {
+          saveGameService.delete(current.difficulty);
+        } else {
+          saveGameService.save(current);
+        }
       }
     });
 
@@ -51,7 +54,7 @@ class GameNotifier extends AsyncNotifier<GameState?> {
 
     _gameEngine = GameEngine(initialState);
     _startTimer();
-    return _gameEngine.currentState;
+    return _gameEngine?.currentState;
   }
 
   Future<GameState> _generateNew(Difficulty difficulty) async {
@@ -63,74 +66,76 @@ class GameNotifier extends AsyncNotifier<GameState?> {
 
   void _startTimer() {
     _timer = Timer.periodic(kTick, (_) {
-      _gameEngine.tick(kTick);
-      state = AsyncData(_gameEngine.currentState);
+      _gameEngine?.tick(kTick);
+      state = AsyncData(_gameEngine?.currentState);
     });
   }
 
   void inputDigit(int cellIndex, int digit) {
     if (board.inputMode == .number) {
       final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
-      _gameEngine.inputDigit(
+      _gameEngine?.inputDigit(
         cellIndex,
         digit,
         autoRemoveNotes: autoRemoveNotes,
       );
     } else {
-      _gameEngine.toggleNote(cellIndex, digit);
+      _gameEngine?.toggleNote(cellIndex, digit);
     }
-    state = AsyncData(_gameEngine.currentState);
-    if (_gameEngine.currentState.puzzleComplete) {
+    state = AsyncData(_gameEngine?.currentState);
+    if (_gameEngine?.currentState.puzzleComplete == true) {
       _onPuzzleComplete();
     }
   }
 
   void erase([int? index]) {
     if (index != null) {
-      _gameEngine.erase(index);
+      _gameEngine?.erase(index);
     } else if (board.selectedCell != null) {
-      _gameEngine.erase(board.selectedCell!);
+      _gameEngine?.erase(board.selectedCell!);
     }
-    state = AsyncData(_gameEngine.currentState);
+    state = AsyncData(_gameEngine?.currentState);
   }
 
   void undo() {
-    _gameEngine.undo();
-    state = AsyncData(_gameEngine.currentState);
+    _gameEngine?.undo();
+    state = AsyncData(_gameEngine?.currentState);
   }
 
   void hint() {
     final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
-    _gameEngine.revealHint(autoRemoveNotes: autoRemoveNotes);
-    state = AsyncData(_gameEngine.currentState);
-    if (_gameEngine.currentState.puzzleComplete) {
+    _gameEngine?.revealHint(autoRemoveNotes: autoRemoveNotes);
+    state = AsyncData(_gameEngine?.currentState);
+    if (_gameEngine?.currentState.puzzleComplete == true) {
       _onPuzzleComplete();
     }
   }
 
   void _onPuzzleComplete() {
     _timer?.cancel();
-    final completed = _gameEngine.currentState;
-    final record = StatRecord.fromGameState(completed);
-    ref.read(lastCompletionRecordProvider.notifier).state = record;
-    ref.read(statsNotifierProvider.notifier).add(record);
+    final completed = _gameEngine?.currentState;
+    if (completed != null) {
+      final record = StatRecord.fromGameState(completed);
+      ref.read(lastCompletionRecordProvider.notifier).state = record;
+      ref.read(statsNotifierProvider.notifier).add(record);
+    }
   }
 
   void runValidation() {
-    final errors = _gameEngine.findErrors();
-    ref.read(boardProvider.notifier).setErrorCells(errors);
-    state = AsyncData(_gameEngine.currentState);
+    final errors = _gameEngine?.findErrors();
+    ref.read(boardProvider.notifier).setErrorCells(errors ?? {});
+    state = AsyncData(_gameEngine?.currentState);
   }
 
   void applyAutoNotes() {
-    _gameEngine.autoFillNotes();
-    state = AsyncData(_gameEngine.currentState);
+    _gameEngine?.autoFillNotes();
+    state = AsyncData(_gameEngine?.currentState);
   }
 
   void restart() {
-    _gameEngine.restart();
-    state = AsyncData(_gameEngine.currentState);
+    _gameEngine?.restart();
+    state = AsyncData(_gameEngine?.currentState);
   }
 
-  bool get canUndo => _gameEngine.canUndo;
+  bool get canUndo => _gameEngine?.canUndo == true;
 }

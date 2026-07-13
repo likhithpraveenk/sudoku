@@ -8,10 +8,14 @@ import 'package:sudoku/presentation/screens/home_screen.dart';
 import 'package:sudoku/presentation/widgets/no_scrollbar_behavior.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
+const kLogRiverpod = false;
+
 final class Logger extends ProviderObserver {
   @override
   void didAddProvider(ProviderObserverContext context, Object? value) {
-    log('[+] $value', name: '${context.provider.name}');
+    if (kLogRiverpod) {
+      log('[+] $value', name: '${context.provider.name}');
+    }
   }
 
   @override
@@ -20,12 +24,16 @@ final class Logger extends ProviderObserver {
     Object? previousValue,
     Object? newValue,
   ) {
-    log('[~] $newValue', name: '${context.provider.name}');
+    if (kLogRiverpod) {
+      log('[~] $newValue', name: '${context.provider.name}');
+    }
   }
 
   @override
   void didDisposeProvider(ProviderObserverContext context) {
-    log('[-]', name: '${context.provider.name}');
+    if (kLogRiverpod) {
+      log('[-]', name: '${context.provider.name}');
+    }
   }
 }
 

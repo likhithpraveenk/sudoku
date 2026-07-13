@@ -36,7 +36,7 @@ final currentThemeProvider = Provider((ref) {
     brightness: config.brightness,
     dynamicSchemeVariant: schemeVariant,
   );
-  if (trueBlack) {
+  if (trueBlack && config.brightness == .dark) {
     colorScheme = colorScheme.copyWith(surface: Colors.black);
   }
 
