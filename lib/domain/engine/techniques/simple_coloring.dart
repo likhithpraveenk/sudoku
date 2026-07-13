@@ -71,11 +71,9 @@ class SimpleColoring implements SudokuTechnique {
             }
             if (intraConflict) {
               for (final idx in cellsOfColor) {
-                if (grid.isCandidate(idx, digit)) {
-                  return [
-                    IndirectHint(idx, [digit], Difficulty.expert),
-                  ];
-                }
+                return [
+                  IndirectHint(idx, [digit], .expert),
+                ];
               }
             }
           }
@@ -95,7 +93,7 @@ class SimpleColoring implements SudokuTechnique {
             }
             if (sees0 && sees1) {
               return [
-                IndirectHint(i, [digit], Difficulty.expert),
+                IndirectHint(i, [digit], .expert),
               ];
             }
           }

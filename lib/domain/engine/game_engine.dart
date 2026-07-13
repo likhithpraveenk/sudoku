@@ -37,14 +37,14 @@ class GameEngine {
     previousNotes[cellIndex] = Set<int>.from(_state.notes[cellIndex]);
 
     final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
-    if (digit != 0) {
-      for (final peerIndex in peersOf(cellIndex)) {
-        previousNotes[peerIndex] = Set<int>.from(_state.notes[peerIndex]);
-        if (autoRemoveNotes) {
-          newNotes[peerIndex].remove(digit);
-        }
+
+    for (final peerIndex in peersOf(cellIndex)) {
+      previousNotes[peerIndex] = Set<int>.from(_state.notes[peerIndex]);
+      if (autoRemoveNotes) {
+        newNotes[peerIndex].remove(digit);
       }
     }
+
     newNotes[cellIndex].clear();
 
     final action = DigitAction(
@@ -69,6 +69,9 @@ class GameEngine {
   void toggleNote(int cellIndex, int digit) {
     if (isGiven(_state, cellIndex)) return;
 
+    final previousValue = getValue(_state, cellIndex);
+    final grid = _state.grid.clone()..clearValue(cellIndex);
+
     final current = Set<int>.from(_state.notes[cellIndex]);
     final updated = current.contains(digit)
         ? (current..remove(digit))
@@ -78,12 +81,14 @@ class GameEngine {
       cellIndex: cellIndex,
       previousNotes: Set<int>.from(_state.notes[cellIndex]),
       newNotes: Set<int>.from(updated),
+      previousValue: previousValue,
     );
 
     final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
     newNotes[cellIndex] = updated;
 
     _state = _state.copyWith(
+      grid: grid,
       notes: newNotes,
       history: [..._state.history, action],
     );
@@ -131,7 +136,9 @@ class GameEngine {
       case PencilAction():
         final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
         newNotes[action.cellIndex] = Set<int>.from(action.previousNotes);
-        _state = _state.copyWith(notes: newNotes, history: trimmed);
+        final grid = _state.grid.clone()
+          ..setValue(action.cellIndex, action.previousValue);
+        _state = _state.copyWith(grid: grid, notes: newNotes, history: trimmed);
         break;
       case EraseAction():
         final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));

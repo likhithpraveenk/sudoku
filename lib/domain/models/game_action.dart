@@ -24,6 +24,7 @@ class PencilAction extends GameAction {
     required this.cellIndex,
     required this.previousNotes,
     required this.newNotes,
+    required this.previousValue,
   });
 
   final int cellIndex;
@@ -31,6 +32,8 @@ class PencilAction extends GameAction {
   final Set<int> previousNotes;
 
   final Set<int> newNotes;
+
+  final int previousValue;
 }
 
 class EraseAction extends GameAction {

@@ -115,7 +115,10 @@ class SudokuGrid {
     final buffer = StringBuffer();
     for (var i = 0; i < 81; i++) {
       if (i % 9 == 0 && i != 0) {
-        buffer.writeln('------+-------+------');
+        buffer.writeln();
+        if (i == 27 || i == 54) {
+          buffer.writeln('------+-------+------');
+        }
       }
       if (i % 3 == 0 && i % 9 != 0) {
         buffer.write('| ');

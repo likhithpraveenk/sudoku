@@ -32,16 +32,17 @@ int _search(List<int> cells, List<Set<int>> candidates, {required int limit}) {
 
   var count = 0;
   for (final digit in List<int>.from(candidates[index])) {
-    final cellsCopy = List<int>.from(cells);
     final snap = _snapshot(candidates);
+    final cellsCopy = List<int>.from(cells);
+
     cellsCopy[index] = digit;
     _place(cellsCopy, candidates, index, digit);
     count += _search(cellsCopy, candidates, limit: limit);
-    if (limit == 1 && count > 0) {
+
+    _restore(candidates, snap);
+    if ((limit == 1 && count > 0) || count >= limit) {
       return count;
     }
-    _restore(candidates, snap);
-    if (count >= limit) return count;
   }
   return count;
 }
