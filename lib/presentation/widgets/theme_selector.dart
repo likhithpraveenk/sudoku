@@ -10,8 +10,61 @@ class ThemeSelector extends ConsumerStatefulWidget {
   ConsumerState<ThemeSelector> createState() => _ThemeSelectorState();
 }
 
-class _ThemeSelectorState extends ConsumerState<ThemeSelector> {
-  bool _expanded = false;
+class _ThemeSelectorState extends ConsumerState<ThemeSelector>
+    with SingleTickerProviderStateMixin {
+  final _controller = OverlayPortalController();
+  final _link = LayerLink();
+
+  late final AnimationController _animation;
+  late final Animation<double> _opacity;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animation = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+
+    _opacity = CurvedAnimation(parent: _animation, curve: Curves.easeOutCubic);
+
+    _scale = Tween(begin: .95, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animation,
+        curve: Curves.easeOutBack,
+        reverseCurve: Curves.easeInCubic,
+      ),
+    );
+
+    _animation.addStatusListener((status) {
+      if (status == .dismissed) {
+        _controller.hide();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animation.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    if (_controller.isShowing) {
+      _animation.reverse();
+    } else {
+      _controller.show();
+      _animation.forward(from: 0);
+    }
+  }
+
+  void _hide() {
+    if (_controller.isShowing) {
+      _animation.reverse();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,52 +72,76 @@ class _ThemeSelectorState extends ConsumerState<ThemeSelector> {
     final scheme = Theme.of(context).colorScheme;
 
     return TapRegion(
-      onTapOutside: (_) => setState(() => _expanded = false),
-      child: Column(
-        mainAxisSize: .min,
-        crossAxisAlignment: .end,
-        children: [
-          Padding(
-            padding: const .only(right: 4),
-            child: IconButton(
-              tooltip: 'Theme Selector',
-              icon: const Icon(Icons.palette_outlined),
-              onPressed: () => setState(() => _expanded = !_expanded),
-            ),
-          ),
-          ClipRect(
-            child: AnimatedAlign(
-              alignment: Alignment.topRight,
-              heightFactor: _expanded ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 200),
-              curve: _expanded ? Curves.easeOutCubic : Curves.easeInCubic,
-              child: Container(
-                margin: const .only(top: 4),
-                padding: const .all(8),
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainer,
-                  borderRadius: .circular(6),
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.sizeOf(context).height * 0.5,
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < items.length; i++)
-                          Padding(
-                            padding: const .symmetric(vertical: 4),
-                            child: ThemeSwatch(index: i, config: items[i]),
+      onTapOutside: (_) => _hide(),
+      child: OverlayPortal(
+        controller: _controller,
+        overlayChildBuilder: (context) {
+          return UnconstrainedBox(
+            alignment: .topRight,
+            child: CompositedTransformFollower(
+              link: _link,
+              targetAnchor: .bottomRight,
+              followerAnchor: .topRight,
+              offset: const Offset(-3.6, 3.6),
+              child: Material(
+                color: Colors.transparent,
+                child: FadeTransition(
+                  opacity: _opacity,
+                  child: ScaleTransition(
+                    scale: _scale,
+                    alignment: .topRight,
+                    child: Container(
+                      padding: const .all(8),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainer,
+                        borderRadius: .circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: .18),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
-                      ],
+                        ],
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 200,
+                          maxHeight: MediaQuery.sizeOf(context).height * .5,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: .min,
+                            children: [
+                              for (var i = 0; i < items.length; i++)
+                                Padding(
+                                  padding: const .symmetric(vertical: 4),
+                                  child: ThemeSwatch(
+                                    index: i,
+                                    config: items[i],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
+          );
+        },
+        child: CompositedTransformTarget(
+          link: _link,
+          child: Padding(
+            padding: const .only(right: 4),
+            child: IconButton(
+              tooltip: 'Theme Selector',
+              icon: const Icon(Icons.palette_outlined),
+              onPressed: _toggle,
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

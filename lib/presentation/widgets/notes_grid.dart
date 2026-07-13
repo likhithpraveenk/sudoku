@@ -85,12 +85,12 @@ class _NotesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: .min,
+      mainAxisAlignment: .center,
       children: [
         for (final digit in digits)
           Padding(
-            padding: const .symmetric(horizontal: 0.8),
+            padding: const .symmetric(horizontal: 1),
             child: Text(
               '$digit',
               style: TextStyle(

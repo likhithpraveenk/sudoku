@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
-import 'package:sudoku/presentation/shared/breakpoints.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/settings_provider.dart';
@@ -46,23 +45,21 @@ class DigitPad extends ConsumerWidget {
             digit: 'X',
             active: false,
             count: 9,
-            showCount: showRemaining,
+            showCount: false,
             onTap: gameNotifier.erase,
           ),
         );
 
     return Padding(
-      padding: const .symmetric(horizontal: 16),
-      child: context.isExpanded
-          ? Wrap(spacing: 6, runSpacing: 6, children: [...buttons])
-          : Column(
-              mainAxisSize: .min,
-              children: [
-                Wrap(spacing: 6, children: buttons.sublist(0, 5)),
-                const SizedBox(height: 6),
-                Wrap(spacing: 6, children: buttons.sublist(5)),
-              ],
-            ),
+      padding: const .symmetric(horizontal: 12),
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          Wrap(spacing: 6, children: buttons.sublist(0, 5)),
+          const SizedBox(height: 6),
+          Wrap(spacing: 6, children: buttons.sublist(5)),
+        ],
+      ),
     );
   }
 }

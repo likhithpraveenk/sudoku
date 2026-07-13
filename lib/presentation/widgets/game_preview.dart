@@ -9,17 +9,18 @@ class GamePreview extends StatelessWidget {
     required this.showRemainingCounts,
     required this.maskGivenCells,
     required this.highlightSameDigits,
+    this.gridSize = 220.0,
     super.key,
   });
 
   final bool showRemainingCounts;
   final bool maskGivenCells;
   final bool highlightSameDigits;
+  final double gridSize;
 
   @override
   Widget build(BuildContext context) {
-    const double gridSize = 220.0;
-    const double cellSize = gridSize / 9;
+    final cellSize = gridSize / 9;
 
     final values = List<int>.filled(81, 0);
     final noteSets = List<Set<int>>.generate(81, (_) => <int>{});

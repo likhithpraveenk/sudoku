@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
-import 'package:sudoku/presentation/shared/breakpoints.dart';
 import 'package:sudoku/presentation/widgets/sudoku_cell.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
@@ -20,9 +19,7 @@ class GridWidget extends StatelessWidget {
     final mq = MediaQuery.sizeOf(context);
     final availableHeight =
         mq.height - (Scaffold.of(context).appBarMaxHeight ?? 56.0) - 220.0;
-    final maxGrid = context.isExpanded
-        ? mq.height - 120
-        : (availableHeight > 200 ? availableHeight : mq.width - 16);
+    final maxGrid = availableHeight > 200 ? availableHeight : mq.width - 16;
     final size = maxGrid.clamp(0.0, mq.width - 16).clamp(0.0, 520.0);
 
     return IgnorePointer(

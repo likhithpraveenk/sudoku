@@ -27,6 +27,9 @@ class SudokuCell extends StatelessWidget {
   final bool hasNoteOfSameDigit;
   final bool maskGivenCells;
 
+  static const _duration = Duration(milliseconds: 200);
+  static const _curve = Curves.easeOutCubic;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -64,36 +67,54 @@ class SudokuCell extends StatelessWidget {
       ),
       child: Padding(
         padding: const .all(2),
-        child: DecoratedBox(
+        child: AnimatedContainer(
+          duration: _duration,
+          curve: _curve,
           decoration: BoxDecoration(
             color: isError ? scheme.errorContainer : tileColor,
             borderRadius: .circular(6),
             border: .all(
-              width: 0.8,
+              width: 1,
               color: isSelected ? scheme.errorContainer : Colors.transparent,
             ),
           ),
-          child: value != 0
-              ? Center(
-                  child: Text(
-                    '$value',
-                    style: TextStyle(
-                      fontSize: size * 0.52,
-                      fontWeight: .w500,
-                      color: isError ? scheme.onErrorContainer : foreground,
-                    ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 100),
+            switchInCurve: _curve,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween(begin: .96, end: 1.0).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: switch (value) {
+              > 0 => Center(
+                key: ValueKey(value),
+                child: Text(
+                  '$value',
+                  style: TextStyle(
+                    fontSize: size * .52,
+                    fontWeight: .w500,
+                    color: isError ? scheme.onErrorContainer : foreground,
                   ),
-                )
-              : notes.isNotEmpty
-              ? Padding(
-                  padding: const .all(2),
-                  child: NotesGrid(
-                    notes: notes,
-                    cellSize: size,
-                    hasNoteOfSameDigit: hasNoteOfSameDigit || isSelected,
-                  ),
-                )
-              : null,
+                ),
+              ),
+              _ when notes.isNotEmpty => Padding(
+                key: const ValueKey('notes'),
+                padding: const .all(2),
+                child: NotesGrid(
+                  notes: notes,
+                  cellSize: size,
+                  hasNoteOfSameDigit: hasNoteOfSameDigit || isSelected,
+                ),
+              ),
+              _ => const SizedBox.shrink(key: ValueKey('empty')),
+            },
+          ),
         ),
       ),
     );

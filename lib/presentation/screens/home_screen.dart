@@ -118,7 +118,10 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const Positioned(top: 6, right: 6, child: ThemeSelector()),
+            const Align(
+              alignment: .topRight,
+              child: Padding(padding: .all(6), child: ThemeSelector()),
+            ),
           ],
         ),
       ),

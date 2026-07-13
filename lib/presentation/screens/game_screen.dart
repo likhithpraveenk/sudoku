@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
-import 'package:sudoku/presentation/shared/breakpoints.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
 import 'package:sudoku/presentation/widgets/action_row.dart';
 import 'package:sudoku/presentation/widgets/digit_pad.dart';
@@ -64,20 +63,20 @@ class GameScreen extends ConsumerWidget {
                     final current = board.selectedCell ?? 0;
 
                     switch (key) {
-                      case .arrowLeft:
+                      case .arrowLeft || .keyA:
                         if (current % 9 > 0) {
                           boardNotifier.selectCell(current - 1);
                         }
                         return .handled;
-                      case .arrowRight:
+                      case .arrowRight || .keyD:
                         if (current % 9 < 8) {
                           boardNotifier.selectCell(current + 1);
                         }
                         return .handled;
-                      case .arrowUp:
+                      case .arrowUp || .keyW:
                         if (current >= 9) boardNotifier.selectCell(current - 9);
                         return .handled;
-                      case .arrowDown:
+                      case .arrowDown || .keyS:
                         if (current <= 71) {
                           boardNotifier.selectCell(current + 9);
                         }
@@ -108,32 +107,28 @@ class GameScreen extends ConsumerWidget {
                 );
               },
             ),
-            if (showTimer && game != null && !game.puzzleComplete)
-              Align(
-                alignment: .topCenter,
-                child: Padding(
-                  padding: const .all(12),
-                  child: Text(
-                    formatTime(game.elapsed),
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
-              ),
             Align(
-              alignment: .topLeft,
+              alignment: .topCenter,
               child: Padding(
                 padding: const .all(6),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.chevron_left),
+                child: Row(
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.chevron_left),
+                    ),
+                    if (showTimer && game != null && !game.puzzleComplete)
+                      Text(
+                        formatTime(game.elapsed),
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    const ThemeSelector(),
+                  ],
                 ),
               ),
-            ),
-            const Align(
-              alignment: .topRight,
-              child: Padding(padding: .all(6), child: ThemeSelector()),
             ),
           ],
         ),
@@ -166,8 +161,11 @@ class _GameBodyState extends ConsumerState<_GameBody>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == .paused || state == .detached) {
-      ref.read(saveGameServiceProvider).save(widget.state);
+    if (state == .paused || state == .detached || state == .hidden) {
+      final current = ref.read(gameProvider).value;
+      if (current != null) {
+        ref.read(saveGameServiceProvider).save(current);
+      }
     }
   }
 
@@ -183,22 +181,10 @@ class _GameBodyState extends ConsumerState<_GameBody>
       }
     });
 
-    final isExpanded = context.isExpanded;
-
     final grid = GridWidget(gameState: widget.state);
     const action = ActionRow();
     final digits = DigitPad(state: widget.state);
 
-    final base = isExpanded
-        ? GameLayoutParams.desktop
-        : GameLayoutParams.mobile;
-
-    return GameLayout(
-      params: base,
-      grid: grid,
-      actionRow: action,
-      digitPad: digits,
-      isExpanded: isExpanded,
-    );
+    return GameLayout(grid: grid, digitPad: digits, actionRow: action);
   }
 }

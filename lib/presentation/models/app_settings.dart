@@ -37,17 +37,20 @@ class AppSettings {
     schemeVariant: schemeVariant ?? this.schemeVariant,
   );
 
-  factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
-    showRemainingCounts: json['showRemainingCounts'] as bool,
-    showTimer: json['showTimer'] as bool,
-    maskGivenCells: json['maskGivenCells'] as bool,
-    autoRemoveNotes: json['autoRemoveNotes'] as bool,
-    highlightSameDigits: json['highlightSameDigits'] as bool,
-    trueBlackMode: json['trueBlackMode'] as bool,
-    schemeVariant: DynamicSchemeVariant.values.firstWhere(
-      (v) => v.name == json['schemeVariant'],
-    ),
-  );
+  factory AppSettings.fromJson(Map<String, dynamic> json) {
+    return AppSettings(
+      showRemainingCounts: json['showRemainingCounts'] as bool? ?? true,
+      showTimer: json['showTimer'] as bool? ?? true,
+      maskGivenCells: json['maskGivenCells'] as bool? ?? true,
+      autoRemoveNotes: json['autoRemoveNotes'] as bool? ?? true,
+      highlightSameDigits: json['highlightSameDigits'] as bool? ?? true,
+      trueBlackMode: json['trueBlackMode'] as bool? ?? false,
+      schemeVariant: .values.firstWhere(
+        (v) => v.name == json['schemeVariant'],
+        orElse: () => .tonalSpot,
+      ),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'showRemainingCounts': showRemainingCounts,
@@ -58,9 +61,4 @@ class AppSettings {
     'trueBlackMode': trueBlackMode,
     'schemeVariant': schemeVariant.name,
   };
-
-  @override
-  String toString() {
-    return toJson().toString();
-  }
 }
