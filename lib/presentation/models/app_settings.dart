@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
 
+enum NotesLayout {
+  grid,
+  fixed;
+
+  String get label => switch (this) {
+    grid => 'Compact',
+    fixed => 'Fixed',
+  };
+
+  String get description => switch (this) {
+    grid => 'Packs notes into rows, using as little space as possible',
+    fixed => 'Each note is fixed its slot in mini 3x3 grid',
+  };
+}
+
 class AppSettings {
   const AppSettings({
     this.showRemainingCounts = true,
@@ -9,6 +24,7 @@ class AppSettings {
     this.highlightSameDigits = true,
     this.trueBlackMode = false,
     this.schemeVariant = .tonalSpot,
+    this.notesLayout = .grid,
   });
 
   final bool showRemainingCounts;
@@ -18,6 +34,7 @@ class AppSettings {
   final bool highlightSameDigits;
   final bool trueBlackMode;
   final DynamicSchemeVariant schemeVariant;
+  final NotesLayout notesLayout;
 
   AppSettings copyWith({
     bool? showRemainingCounts,
@@ -27,6 +44,7 @@ class AppSettings {
     bool? highlightSameDigits,
     bool? trueBlackMode,
     DynamicSchemeVariant? schemeVariant,
+    NotesLayout? notesLayout,
   }) => AppSettings(
     showRemainingCounts: showRemainingCounts ?? this.showRemainingCounts,
     showTimer: showTimer ?? this.showTimer,
@@ -35,6 +53,7 @@ class AppSettings {
     highlightSameDigits: highlightSameDigits ?? this.highlightSameDigits,
     trueBlackMode: trueBlackMode ?? this.trueBlackMode,
     schemeVariant: schemeVariant ?? this.schemeVariant,
+    notesLayout: notesLayout ?? this.notesLayout,
   );
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -49,6 +68,10 @@ class AppSettings {
         (v) => v.name == json['schemeVariant'],
         orElse: () => .tonalSpot,
       ),
+      notesLayout: NotesLayout.values.firstWhere(
+        (v) => v.name == json['notesLayout'],
+        orElse: () => .grid,
+      ),
     );
   }
 
@@ -60,5 +83,6 @@ class AppSettings {
     'highlightSameDigits': highlightSameDigits,
     'trueBlackMode': trueBlackMode,
     'schemeVariant': schemeVariant.name,
+    'notesLayout': notesLayout.name,
   };
 }

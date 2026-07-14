@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
+import 'package:sudoku/presentation/models/app_settings.dart';
 import 'package:sudoku/presentation/widgets/digit_pad.dart';
 import 'package:sudoku/presentation/widgets/sudoku_cell.dart';
 
@@ -9,6 +10,7 @@ class GamePreview extends StatelessWidget {
     required this.showRemainingCounts,
     required this.maskGivenCells,
     required this.highlightSameDigits,
+    this.notesLayout = NotesLayout.grid,
     this.gridSize = 220.0,
     super.key,
   });
@@ -16,6 +18,7 @@ class GamePreview extends StatelessWidget {
   final bool showRemainingCounts;
   final bool maskGivenCells;
   final bool highlightSameDigits;
+  final NotesLayout notesLayout;
   final double gridSize;
 
   @override
@@ -60,12 +63,36 @@ class GamePreview extends StatelessWidget {
     values[37] = 5;
     values[54] = 9;
 
-    noteSets[6] = {1, 8};
-    noteSets[7] = {1};
-    noteSets[10] = {2, 7};
-    noteSets[11] = {2, 7};
-    noteSets[24] = {5};
-    noteSets[26] = {5};
+    final notesMap = <int, Set<int>>{
+      6: {1, 8},
+      7: {1},
+      10: {2, 7},
+      11: {2, 7},
+      13: {3, 4, 6},
+      15: {6, 9},
+      20: {4, 7, 9},
+      23: {2, 5, 8},
+      24: {5},
+      26: {5},
+      30: {1, 2, 4, 6},
+      33: {1, 2, 3, 4},
+      38: {2, 6, 8},
+      41: {1, 4, 5},
+      44: {3, 8},
+      48: {1, 6, 8},
+      51: {2, 4, 7},
+      55: {3, 5, 6, 7},
+      58: {2, 4},
+      60: {1, 2, 5},
+      63: {4, 7, 9},
+      66: {1, 2, 5, 8},
+      69: {2, 6, 9},
+      72: {2, 4, 5},
+      76: {1, 5, 6},
+    };
+    for (final entry in notesMap.entries) {
+      noteSets[entry.key] = entry.value;
+    }
 
     const selectedIndex = 21;
 
@@ -104,6 +131,7 @@ class GamePreview extends StatelessWidget {
         isSameDigit: isSame,
         hasNoteOfSameDigit: hasNote,
         maskGivenCells: maskGivenCells,
+        notesLayout: notesLayout,
       );
     }
 

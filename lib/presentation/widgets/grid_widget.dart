@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/widgets/sudoku_cell.dart';
@@ -96,7 +93,6 @@ class _Cell extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        unawaited(HapticFeedback.selectionClick());
         if (isError) {
           ref.read(boardProvider.notifier).removeErrorCell(index);
         }
@@ -122,6 +118,7 @@ class _Cell extends ConsumerWidget {
         isSameDigit: isSameDigit,
         hasNoteOfSameDigit: hasNote || isSelected,
         maskGivenCells: maskGivenCells,
+        notesLayout: settings.notesLayout,
       ),
     );
   }
