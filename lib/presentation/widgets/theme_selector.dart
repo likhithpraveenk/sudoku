@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudoku/presentation/models/theme_config.dart';
 import 'package:sudoku/presentation/widgets/theme_swatch.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
@@ -14,6 +15,7 @@ class _ThemeSelectorState extends ConsumerState<ThemeSelector>
     with SingleTickerProviderStateMixin {
   final _controller = OverlayPortalController();
   final _link = LayerLink();
+  final _groupId = Object();
 
   late final AnimationController _animation;
   late final Animation<double> _opacity;
@@ -68,59 +70,78 @@ class _ThemeSelectorState extends ConsumerState<ThemeSelector>
 
   @override
   Widget build(BuildContext context) {
-    final items = ref.watch(allThemesProvider);
+    final customThemes = ref.watch(customThemeProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return TapRegion(
+      groupId: _groupId,
       onTapOutside: (_) => _hide(),
       child: OverlayPortal(
         controller: _controller,
         overlayChildBuilder: (context) {
-          return UnconstrainedBox(
-            alignment: .topRight,
-            child: CompositedTransformFollower(
-              link: _link,
-              targetAnchor: .bottomRight,
-              followerAnchor: .topRight,
-              offset: const Offset(-3.6, 3.6),
-              child: Material(
-                color: Colors.transparent,
-                child: FadeTransition(
-                  opacity: _opacity,
-                  child: ScaleTransition(
-                    scale: _scale,
-                    alignment: .topRight,
-                    child: Container(
-                      padding: const .all(8),
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainer,
-                        borderRadius: .circular(6),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: .18),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: 200,
-                          maxHeight: MediaQuery.sizeOf(context).height * .5,
+          return TapRegion(
+            groupId: _groupId,
+            child: UnconstrainedBox(
+              alignment: .topRight,
+              child: CompositedTransformFollower(
+                link: _link,
+                targetAnchor: .bottomRight,
+                followerAnchor: .topRight,
+                offset: const Offset(-1.6, 3),
+                child: Material(
+                  color: Colors.transparent,
+                  child: FadeTransition(
+                    opacity: _opacity,
+                    child: ScaleTransition(
+                      scale: _scale,
+                      alignment: .topRight,
+                      child: Container(
+                        padding: const .all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainer,
+                          borderRadius: .circular(6),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: .18),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: .min,
-                            children: [
-                              for (var i = 0; i < items.length; i++)
-                                Padding(
-                                  padding: const .symmetric(vertical: 4),
-                                  child: ThemeSwatch(
-                                    index: i,
-                                    config: items[i],
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: 200,
+                            maxHeight: MediaQuery.sizeOf(context).height * .5,
+                          ),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: .min,
+                              children: [
+                                for (var i = 0; i < customThemes.length; i++)
+                                  Padding(
+                                    padding: const .symmetric(vertical: 4),
+                                    child: ThemeSwatch(
+                                      index: i,
+                                      config: customThemes[i],
+                                    ),
                                   ),
-                                ),
-                            ],
+                                if (customThemes.isNotEmpty)
+                                  Container(
+                                    width: 32,
+                                    margin: const .symmetric(vertical: 4),
+                                    color: scheme.outline,
+                                    height: 2,
+                                  ),
+                                for (var i = 0; i < builtInThemes.length; i++)
+                                  Padding(
+                                    padding: const .symmetric(vertical: 4),
+                                    child: ThemeSwatch(
+                                      index: i,
+                                      config: builtInThemes[i],
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

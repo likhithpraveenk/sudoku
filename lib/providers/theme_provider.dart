@@ -19,11 +19,6 @@ final customThemeProvider = NotifierProvider(
   name: 'customThemeProvider',
 );
 
-final allThemesProvider = Provider((ref) {
-  final custom = ref.watch(customThemeProvider);
-  return [...builtInThemes, ...custom];
-}, name: 'allThemesProvider');
-
 final currentThemeProvider = Provider((ref) {
   final config = ref.watch(themeConfigProvider);
   final trueBlack = ref.watch(settingsProvider.select((s) => s.trueBlackMode));
@@ -73,7 +68,7 @@ class ThemeNotifier extends Notifier<ThemeConfig> {
     if (json != null) {
       return ThemeConfig.fromJson(jsonDecode(json) as Map<String, dynamic>);
     }
-    return ref.read(allThemesProvider).first;
+    return builtInThemes.first;
   }
 
   void select(ThemeConfig config) {
@@ -101,6 +96,7 @@ class CustomThemeNotifier extends Notifier<List<ThemeConfig>> {
   }
 
   void add(ThemeConfig config) {
+    if (state.any((e) => e == config)) return;
     state = [...state, config];
     _persist();
   }
