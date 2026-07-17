@@ -22,7 +22,7 @@ jobs:
         with:
           channel: stable
           flutter-version-file: ./pubspec.yaml
-          cache: true
+          cache: false
 
       - name: Get dependencies
         run: flutter pub get
