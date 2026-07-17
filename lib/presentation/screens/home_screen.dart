@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/presentation/screens/game_screen.dart';
 import 'package:sudoku/presentation/screens/settings_screen.dart';
+import 'package:sudoku/presentation/screens/stats_screen.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
@@ -121,6 +122,17 @@ class HomeScreen extends ConsumerWidget {
               child: Row(
                 mainAxisSize: .min,
                 children: [
+                  IconButton(
+                    tooltip: 'Stats',
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const StatsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.bar_chart),
+                  ),
                   IconButton(
                     tooltip: 'Settings',
                     onPressed: () async {

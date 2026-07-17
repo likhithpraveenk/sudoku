@@ -52,6 +52,11 @@ class StatsNotifier extends Notifier<Map<Difficulty, List<StatRecord>>> {
     await _box.clear();
     state = {for (final d in Difficulty.values) d: const []};
   }
+
+  Future<void> resetPerDifficulty(Difficulty d) async {
+    await _box.delete(d.name);
+    state = {...state, d: const []};
+  }
 }
 
 final statsProvider = Provider.family.autoDispose<List<StatRecord>, Difficulty>(
