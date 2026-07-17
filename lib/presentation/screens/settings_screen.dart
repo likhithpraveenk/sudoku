@@ -32,7 +32,7 @@ class SettingsScreen extends ConsumerWidget {
                 Padding(
                   padding: const .all(12),
                   child: Text(
-                    'Themes',
+                    'Theme',
                     style: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: .bold,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -80,7 +80,6 @@ class SettingsScreen extends ConsumerWidget {
                   builder: (_, ref, _) {
                     final count = ref.watch(customThemeProvider).length;
                     return ListTile(
-                      leading: const Icon(Icons.palette_outlined),
                       title: const Text('Custom colors'),
                       subtitle: Text(
                         count == 0
@@ -213,6 +212,7 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 48),
               ],
             ),
           ),

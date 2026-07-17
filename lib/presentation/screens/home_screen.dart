@@ -42,85 +42,99 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 36),
-                      Wrap(
-                        spacing: 8,
-                        alignment: .center,
-                        children: Difficulty.values.map((d) {
-                          final selected = d == difficulty;
-                          return ChoiceChip(
-                            label: Text(d.displayName),
-                            selected: selected,
-                            onSelected: (_) {
-                              ref.read(difficultyProvider.notifier).set(d);
-                            },
-                            visualDensity: .compact,
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 12),
                       Row(
+                        mainAxisAlignment: .center,
                         children: [
-                          if (continueGameMap[difficulty] != null) ...[
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => const GameScreen(),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  'Continue ${formatTime(continueGameMap[difficulty]!.elapsed)}',
-                                ),
-                              ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left),
+                            onPressed: difficulty.index > 0
+                                ? () => ref
+                                      .read(difficultyProvider.notifier)
+                                      .set(
+                                        Difficulty.values[difficulty.index - 1],
+                                      )
+                                : null,
+                          ),
+                          SizedBox(
+                            width: 150,
+                            child: Text(
+                              difficulty.displayName,
+                              textAlign: .center,
                             ),
-                            const SizedBox(width: 12),
-                          ],
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () async {
-                                await ref
-                                    .read(saveGameServiceProvider)
-                                    .delete(difficulty);
-                                if (context.mounted) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => const GameScreen(),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: const Text('New Game'),
-                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right),
+                            onPressed:
+                                difficulty.index < Difficulty.values.length - 1
+                                ? () => ref
+                                      .read(difficultyProvider.notifier)
+                                      .set(
+                                        Difficulty.values[difficulty.index + 1],
+                                      )
+                                : null,
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: .spaceEvenly,
-                        children: [
-                          IconButton(
-                            tooltip: 'Settings',
-                            onPressed: () async {
-                              await Navigator.of(context).push(
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () async {
+                            await ref
+                                .read(saveGameServiceProvider)
+                                .delete(difficulty);
+                            if (context.mounted) {
+                              Navigator.of(context).push(
                                 MaterialPageRoute<void>(
-                                  builder: (_) => const SettingsScreen(),
+                                  builder: (_) => const GameScreen(),
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text('New Game'),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      if (continueGameMap[difficulty] != null)
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const GameScreen(),
                                 ),
                               );
                             },
-                            icon: const Icon(Icons.settings),
+                            child: Text(
+                              'Continue ${formatTime(continueGameMap[difficulty]!.elapsed)}',
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
                     ],
                   ),
                 ),
               ),
             ),
-            const Align(
+            Align(
               alignment: .topRight,
-              child: Padding(padding: .all(6), child: ThemeSelector()),
+              child: Row(
+                mainAxisSize: .min,
+                children: [
+                  IconButton(
+                    tooltip: 'Settings',
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings),
+                  ),
+                  const Padding(padding: .all(6), child: ThemeSelector()),
+                ],
+              ),
             ),
           ],
         ),
