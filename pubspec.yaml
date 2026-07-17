@@ -5,6 +5,7 @@ version: 1.0.0+1
 
 environment:
   sdk: ^3.12.1
+  flutter: 3.44.1
 
 dependencies:
   cupertino_icons: ^1.0.8
