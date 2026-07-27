@@ -1,12 +1,12 @@
 A clean Sudoku app built with Flutter. Every puzzle is uniquely generated, and its difficulty is derived from the logical solving techniques required to complete it.
 
-## Features
+<b>Features:</b>
 
-- Logic-based difficulty - difficulty is derived from the techniques needed to solve a puzzle (Hidden Single, Naked Pair, X-Wing, Swordfish, and more).
-- In-game assists - notes/pencil marks, auto-notes, undo, conflict highlighting, and validation.
-- Statistics & leaderboard - track your solve times per difficulty, with a top-10 board shown on the solved overlay.
-- Resume - your current game is saved locally so you can continue right where you left off.
-- Theming - light and dark modes plus custom color themes with a live preview.
-- Responsive layout - adapts the control placement for phones and larger screens.
+* Logic-based difficulty - difficulty is derived from the techniques needed to solve a puzzle (Hidden Single, Naked Pair, X-Wing, Swordfish, and more).
+* In-game assists - notes/pencil marks, auto-notes, undo, conflict highlighting, and validation.
+* Statistics & leaderboard - track your solve times per difficulty, with a top-10 board shown on the solved overlay.
+* Resume - your current game is saved locally so you can continue right where you left off.
+* Theming - light and dark modes plus custom color themes with a live preview.
+* Responsive layout - adapts the control placement for phones and larger screens.
 
 The app works fully offline, stores all data locally on your device.

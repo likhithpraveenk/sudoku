@@ -25,13 +25,10 @@ jobs:
           cache: false
 
       - name: Get dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
-
-      - name: Patch Dart JNI for Reproducible Build
-        run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' ${PUB_CACHE}/hosted/*/jni-*/src/CMakeLists.txt || true
 
       - name: Build Signed APKs
         env:
@@ -57,7 +54,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
-          draft: true
           prerelease: ${{ contains(github.ref_name, 'beta') }}
           files: |
             build/app/outputs/flutter-apk/*.apk
