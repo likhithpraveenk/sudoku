@@ -1,4 +1,4 @@
-name: Build & Release Signed APK
+name: Build & Release All Platforms
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
       - "v*"
 
 jobs:
-  build:
+  android:
+    name: Android
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,14 +16,14 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          distribution: "temurin"
+          distribution: temurin
           java-version: "21"
 
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version-file: ./pubspec.yaml
-          cache: false
+          cache: true
 
       - name: Get dependencies
         run: flutter pub get --enforce-lockfile
@@ -30,32 +31,54 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
 
+      - name: Create key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          storeFile=release.keystore
+          EOF
+
       - name: Build Signed APKs
-        env:
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEYSTORE_PATH: "release.keystore"
         run: flutter build apk --release --split-per-abi --no-pub
 
       - name: Remove Keystore
         if: always()
         run: rm -f android/app/release.keystore
 
-      - name: Rename APKs for Release
+      - name: Rename APKs
         run: |
           PREFIX="${{ github.event.repository.name }}-${{ github.ref_name }}"
           cd build/app/outputs/flutter-apk/
-          mv app-arm64-v8a-release.apk "${PREFIX}-arm64.apk"
-          mv app-armeabi-v7a-release.apk "${PREFIX}-armeabi.apk"
-          mv app-x86_64-release.apk "${PREFIX}-x86_64.apk"
+          mv app-arm64-v8a-release.apk   "${PREFIX}-android-arm64.apk"
+          mv app-armeabi-v7a-release.apk "${PREFIX}-android-armeabi.apk"
+          mv app-x86_64-release.apk      "${PREFIX}-android-x86_64.apk"
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: build/app/outputs/flutter-apk/*.apk
+
+  release:
+    name: GitHub Release
+    needs: [android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, 'beta') }}
-          files: |
-            build/app/outputs/flutter-apk/*.apk
+          files: artifacts/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

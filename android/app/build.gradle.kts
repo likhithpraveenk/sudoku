@@ -33,13 +33,10 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = System.getenv("KEY_ALIAS") ?: (keystoreProperties["keyAlias"] as String?)
-            keyPassword =
-                System.getenv("KEY_PASSWORD") ?: (keystoreProperties["keyPassword"] as String?)
-            storePassword =
-                System.getenv("STORE_PASSWORD") ?: (keystoreProperties["storePassword"] as String?)
-            val keystorePath =
-                System.getenv("KEYSTORE_PATH") ?: (keystoreProperties["storeFile"] as String?)
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storePassword = keystoreProperties["storePassword"] as String?
+            val keystorePath = keystoreProperties["storeFile"] as String?
             storeFile = keystorePath?.let { file(it) }
         }
     }
@@ -53,7 +50,6 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = when {
-                System.getenv("KEY_ALIAS") != null -> signingConfigs.getByName("release")
                 keystorePropertiesFile?.exists() == true -> signingConfigs.getByName("release")
                 else -> {
                     println("WARNING: No signing credentials found. Building unsigned apk")
