@@ -28,7 +28,7 @@ final deviceInfoStringProvider = FutureProvider<String>((ref) async {
           '| ${d.productName} | ${d.computerName}',
 
     final WebBrowserInfo d =>
-      '${d.browserName} ${d.appVersion} | ${d.platform}',
+      '${d.browserName} ${d.appVersion} | ${d.productSub}',
 
     final LinuxDeviceInfo d =>
       'Linux ${d.version} | ${d.name} | ${d.prettyName}',
