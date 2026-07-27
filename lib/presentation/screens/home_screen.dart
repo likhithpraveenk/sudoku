@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
+import 'package:sudoku/presentation/screens/about_screen.dart';
 import 'package:sudoku/presentation/screens/game_screen.dart';
 import 'package:sudoku/presentation/screens/settings_screen.dart';
 import 'package:sudoku/presentation/screens/stats_screen.dart';
@@ -111,6 +112,19 @@ class HomeScreen extends ConsumerWidget {
                               'Continue ${formatTime(continueGameMap[difficulty]!.elapsed)}',
                             ),
                           ),
+                        )
+                      else
+                        const ExcludeSemantics(
+                          child: Opacity(
+                            opacity: 0,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                onPressed: null,
+                                child: Text(''),
+                              ),
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -123,6 +137,17 @@ class HomeScreen extends ConsumerWidget {
                 mainAxisSize: .min,
                 children: [
                   IconButton(
+                    tooltip: 'About',
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AboutScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline),
+                  ),
+                  IconButton(
                     tooltip: 'Stats',
                     onPressed: () async {
                       await Navigator.of(context).push(
@@ -131,7 +156,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.bar_chart),
+                    icon: const Icon(Icons.bar_chart_outlined),
                   ),
                   IconButton(
                     tooltip: 'Settings',
@@ -142,7 +167,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.settings),
+                    icon: const Icon(Icons.settings_outlined),
                   ),
                   const Padding(padding: .all(6), child: ThemeSelector()),
                 ],
