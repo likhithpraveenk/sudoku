@@ -16,22 +16,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version-file: ./pubspec.yaml
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build web --release --no-pub --wasm
 
-      - name: Build web
-        run: flutter build web --release --no-pub --wasm
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+      - uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy build/web --project-name=Sudoku
+          command: pages deploy build/web --project-name=sudoku
