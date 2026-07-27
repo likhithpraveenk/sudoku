@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = sudoku
+PRODUCT_NAME = Sudoku
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.likhithpraveenk.sudoku
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.likhithpraveenk. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 Likhith Praveen K. Licensed under the GNU General Public License v3.0.

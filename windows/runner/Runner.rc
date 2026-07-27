@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.likhithpraveenk" "\0"
-            VALUE "FileDescription", "sudoku" "\0"
+            VALUE "CompanyName", "Likhith Praveen K" "\0"
+            VALUE "FileDescription", "Sudoku" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "sudoku" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.likhithpraveenk. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Likhith Praveen K. Licensed under the GNU General Public License v3.0." "\0"
             VALUE "OriginalFilename", "sudoku.exe" "\0"
-            VALUE "ProductName", "sudoku" "\0"
+            VALUE "ProductName", "Sudoku" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
