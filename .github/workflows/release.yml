@@ -25,11 +25,13 @@ jobs:
           flutter-version-file: ./pubspec.yaml
           cache: true
 
-      - name: Get dependencies
-        run: flutter pub get --enforce-lockfile
+      - run: flutter pub get --enforce-lockfile
 
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+
+      - name: Patch Dart JNI for Reproducible Build
+        run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' ${PUB_CACHE}/hosted/*/jni-*/src/CMakeLists.txt || true
 
       - name: Create key.properties
         run: |
