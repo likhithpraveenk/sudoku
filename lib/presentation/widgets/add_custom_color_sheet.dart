@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/models/theme_config.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
-
 class AddCustomColorSheet extends ConsumerStatefulWidget {
   const AddCustomColorSheet({super.key});
 

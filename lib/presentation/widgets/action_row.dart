@@ -25,17 +25,24 @@ class ActionRow extends ConsumerWidget {
               gameNotifier.restart();
               boardNotifier.reset();
             },
+            tooltip: 'Reset',
           ),
           _ActionButton(
             icon: Icons.lightbulb_outline_rounded,
             onTap: () => _showMoreSheet(context, gameNotifier),
+            tooltip: 'Hint',
           ),
           _ActionButton(
             icon: Icons.edit_outlined,
             active: board.inputMode == .pencil,
             onTap: boardNotifier.toggleInputMode,
+            tooltip: 'Pencil',
           ),
-          _ActionButton(icon: Icons.undo_rounded, onTap: gameNotifier.undo),
+          _ActionButton(
+            icon: Icons.undo_rounded,
+            onTap: gameNotifier.undo,
+            tooltip: 'Undo',
+          ),
         ],
       ),
     );
@@ -88,11 +95,17 @@ class ActionRow extends ConsumerWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.icon, this.onTap, this.active = false});
+  const _ActionButton({
+    required this.icon,
+    this.onTap,
+    this.active = false,
+    required this.tooltip,
+  });
 
   final IconData icon;
   final VoidCallback? onTap;
   final bool active;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -103,16 +116,20 @@ class _ActionButton extends StatelessWidget {
         ? scheme.surface
         : scheme.onSurface;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: active ? scheme.primary : Colors.transparent,
-          borderRadius: .circular(6),
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: .circular(6),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: active ? scheme.primary : Colors.transparent,
+            borderRadius: .circular(6),
+          ),
+          child: Icon(icon, color: color, size: 26),
         ),
-        child: Icon(icon, color: color, size: 26),
       ),
     );
   }

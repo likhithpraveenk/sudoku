@@ -15,13 +15,9 @@ A cross-platform Sudoku app built with Flutter. Generates unique puzzles with va
 
 ## Screenshots
 
-| Game                                                                                                     | Home Screen                                                                                    |
-| :------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
-| <img src="metadata/android/en-US/images/phoneScreenshots/1.png" width="300" alt="mid-game sudoku board"> | <img src="metadata/android/en-US/images/phoneScreenshots/2.png" width="300" alt="home screen"> |
-
-| Settings                                                                                                        | Stats                                                                                                                        |
-| :-------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| <img src="metadata/android/en-US/images/phoneScreenshots/3.png" width="300" alt="home screen with mini player"> | <img src="metadata/android/en-US/images/phoneScreenshots/4.png" width="300" alt="now playing screen with playback controls"> |
+|                                                                                                          |                                                                                                |                                                                                             |                                                                                               |
+| :------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------: |
+| <img src="metadata/android/en-US/images/phoneScreenshots/1.png" width="200" alt="mid-game sudoku board"> | <img src="metadata/android/en-US/images/phoneScreenshots/2.png" width="200" alt="home screen"> | <img src="metadata/android/en-US/images/phoneScreenshots/3.png" width="200" alt="settings"> | <img src="metadata/android/en-US/images/phoneScreenshots/4.png" width="200" alt="statistics"> |
 
 ## Architecture
 
