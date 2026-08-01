@@ -2,7 +2,14 @@
 
 A cross-platform Sudoku app built with Flutter. Generates unique puzzles with varying difficulty using logical solving techniques
 
----
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fsudoku.likhithpraveenk.com&style=for-the-badge)
+![F-Droid Version](https://img.shields.io/f-droid/v/com.likhithpraveenk.sudoku?style=for-the-badge)
+[![GitHub Version](https://img.shields.io/github/v/release/likhithpraveenk/sudoku.svg?label=GitHub&style=for-the-badge)](https://github.com/likhithpraveenk/sudoku/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
+
+[<img src="https://raw.githubusercontent.com/likhithpraveenk/storii/main/assets/get-it-on-fdroid.png" alt="Get it on F-Droid" height="50">](https://f-droid.org/packages/com.likhithpraveenk.sudoku)
+[<img src="https://raw.githubusercontent.com/likhithpraveenk/storii/main/assets/get_it_on_github_badge.png" alt="Get it on GitHub" height="50">](https://github.com/likhithpraveenk/sudoku/releases/latest)
+[<img src="https://raw.githubusercontent.com/likhithpraveenk/storii/main/assets/badge_obtainium.png" alt="Get it on Obtainium" height="50">](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://add/https://github.com/likhithpraveenk/sudoku)
 
 ## Features
 
