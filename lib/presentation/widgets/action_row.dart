@@ -21,10 +21,7 @@ class ActionRow extends ConsumerWidget {
         children: [
           _ActionButton(
             icon: Icons.refresh_rounded,
-            onTap: () {
-              gameNotifier.restart();
-              boardNotifier.reset();
-            },
+            onTap: () => _confirmReset(context, gameNotifier, boardNotifier),
             tooltip: 'Reset',
           ),
           _ActionButton(
@@ -46,6 +43,38 @@ class ActionRow extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmReset(
+    BuildContext context,
+    GameNotifier notifier,
+    BoardNotifier boardNotifier,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset game?'),
+        content: const Text(
+          'This will restart the current puzzle. '
+          'Your progress will be lost.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Reset'),
+          ),
+        ],
+        actionsAlignment: .spaceBetween,
+      ),
+    );
+    if (confirmed == true) {
+      notifier.restart();
+      boardNotifier.reset();
+    }
   }
 
   Future<void> _showMoreSheet(

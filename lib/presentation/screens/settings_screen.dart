@@ -116,6 +116,7 @@ class SettingsScreen extends ConsumerWidget {
                           maskGivenCells: settings.maskGivenCells,
                           highlightSameDigits: settings.highlightSameDigits,
                           notesLayout: settings.notesLayout,
+                          removeAnimations: settings.removeAnimations,
                         ),
                       ),
                     ],
@@ -140,12 +141,12 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
                 SwitchListTile(
-                  title: const Text('Auto remove notes'),
-                  value: settings.autoRemoveNotes,
+                  title: const Text('Remove animations'),
+                  value: settings.removeAnimations,
                   contentPadding: const .symmetric(horizontal: 12),
                   onChanged: (v) async {
                     await notifier.update(
-                      (s) => s.copyWith(autoRemoveNotes: v),
+                      (s) => s.copyWith(removeAnimations: v),
                     );
                   },
                 ),
@@ -164,6 +165,16 @@ class SettingsScreen extends ConsumerWidget {
                   onChanged: (v) async {
                     await notifier.update(
                       (s) => s.copyWith(highlightSameDigits: v),
+                    );
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Reduce motion'),
+                  value: settings.removeAnimations,
+                  contentPadding: const .symmetric(horizontal: 12),
+                  onChanged: (v) async {
+                    await notifier.update(
+                      (s) => s.copyWith(removeAnimations: v),
                     );
                   },
                 ),

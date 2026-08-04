@@ -15,6 +15,7 @@ class SudokuCell extends StatelessWidget {
     required this.hasNoteOfSameDigit,
     required this.maskGivenCells,
     this.notesLayout = .grid,
+    this.removeAnimations = false,
     super.key,
   });
 
@@ -29,9 +30,12 @@ class SudokuCell extends StatelessWidget {
   final bool hasNoteOfSameDigit;
   final bool maskGivenCells;
   final NotesLayout notesLayout;
+  final bool removeAnimations;
 
-  static const _duration = Duration(milliseconds: 250);
-  static const _curve = Curves.easeInBack;
+  Duration get _animationDuration =>
+      removeAnimations ? Duration.zero : const Duration(milliseconds: 250);
+  Curve get _animationCurve =>
+      removeAnimations ? Curves.linear : Curves.easeInBack;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +71,7 @@ class SudokuCell extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(2),
       child: TweenAnimationBuilder<double>(
-        duration: _duration,
+        duration: _animationDuration,
         curve: isHighlighted ? Curves.easeOutBack : Curves.easeOutCubic,
         tween: Tween(begin: 0, end: isHighlighted ? 1.0 : 0.0),
         builder: (context, scale, child) {
@@ -83,13 +87,13 @@ class SudokuCell extends StatelessWidget {
               Transform.scale(
                 scale: scale,
                 child: AnimatedContainer(
-                  duration: _duration,
-                  curve: _curve,
+                  duration: _animationDuration,
+                  curve: _animationCurve,
                   decoration: BoxDecoration(
                     color: highlightColor,
                     borderRadius: .circular(6),
                     border: .all(
-                      width: 1,
+                      width: 2,
                       color: isSelected
                           ? scheme.errorContainer
                           : Colors.transparent,
@@ -102,7 +106,7 @@ class SudokuCell extends StatelessWidget {
           );
         },
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 100),
+          duration: _animationDuration,
           transitionBuilder: (child, animation) {
             return FadeTransition(
               opacity: animation,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/models/theme_config.dart';
 import 'package:sudoku/presentation/widgets/theme_swatch.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 class ThemeSelector extends ConsumerStatefulWidget {
@@ -53,7 +54,17 @@ class _ThemeSelectorState extends ConsumerState<ThemeSelector>
     super.dispose();
   }
 
+  bool get removeAnimations => ref.read(settingsProvider).removeAnimations;
+
   void _toggle() {
+    if (removeAnimations) {
+      if (_controller.isShowing) {
+        _controller.hide();
+      } else {
+        _controller.show();
+      }
+      return;
+    }
     if (_controller.isShowing) {
       _animation.reverse();
     } else {
@@ -63,6 +74,10 @@ class _ThemeSelectorState extends ConsumerState<ThemeSelector>
   }
 
   void _hide() {
+    if (removeAnimations) {
+      _controller.hide();
+      return;
+    }
     if (_controller.isShowing) {
       _animation.reverse();
     }

@@ -25,6 +25,7 @@ class AppSettings {
     this.trueBlackMode = false,
     this.schemeVariant = .tonalSpot,
     this.notesLayout = .grid,
+    this.removeAnimations = false,
   });
 
   final bool showRemainingCounts;
@@ -35,6 +36,7 @@ class AppSettings {
   final bool trueBlackMode;
   final DynamicSchemeVariant schemeVariant;
   final NotesLayout notesLayout;
+  final bool removeAnimations;
 
   AppSettings copyWith({
     bool? showRemainingCounts,
@@ -45,6 +47,7 @@ class AppSettings {
     bool? trueBlackMode,
     DynamicSchemeVariant? schemeVariant,
     NotesLayout? notesLayout,
+    bool? removeAnimations,
   }) => AppSettings(
     showRemainingCounts: showRemainingCounts ?? this.showRemainingCounts,
     showTimer: showTimer ?? this.showTimer,
@@ -54,6 +57,7 @@ class AppSettings {
     trueBlackMode: trueBlackMode ?? this.trueBlackMode,
     schemeVariant: schemeVariant ?? this.schemeVariant,
     notesLayout: notesLayout ?? this.notesLayout,
+    removeAnimations: removeAnimations ?? this.removeAnimations,
   );
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
@@ -72,6 +76,7 @@ class AppSettings {
         (v) => v.name == json['notesLayout'],
         orElse: () => .grid,
       ),
+      removeAnimations: json['removeAnimations'] as bool? ?? false,
     );
   }
 
@@ -84,5 +89,6 @@ class AppSettings {
     'trueBlackMode': trueBlackMode,
     'schemeVariant': schemeVariant.name,
     'notesLayout': notesLayout.name,
+    'removeAnimations': removeAnimations,
   };
 }
