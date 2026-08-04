@@ -168,16 +168,6 @@ class SettingsScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                SwitchListTile(
-                  title: const Text('Reduce motion'),
-                  value: settings.removeAnimations,
-                  contentPadding: const .symmetric(horizontal: 12),
-                  onChanged: (v) async {
-                    await notifier.update(
-                      (s) => s.copyWith(removeAnimations: v),
-                    );
-                  },
-                ),
                 Padding(
                   padding: const .all(12),
                   child: Column(
