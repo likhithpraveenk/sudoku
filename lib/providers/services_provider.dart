@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:sudoku/data/hive_boxes.dart';
 import 'package:sudoku/data/services/puzzle_generator_service.dart';
+import 'package:sudoku/data/services/puzzle_import_service.dart';
 import 'package:sudoku/data/services/save_game_service.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
@@ -17,6 +18,11 @@ final puzzleGeneratorServiceProvider = Provider<PuzzleGeneratorService>(
 final saveGameServiceProvider = Provider<SaveGameService>(
   (ref) => SaveGameService(),
   name: 'saveGameServiceProvider',
+);
+
+final puzzleImportServiceProvider = Provider<PuzzleImportService>(
+  (ref) => PuzzleImportService(),
+  name: 'puzzleImportServiceProvider',
 );
 
 final continueGameProvider =

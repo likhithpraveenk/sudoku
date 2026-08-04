@@ -6,6 +6,7 @@ import 'package:sudoku/presentation/screens/game_screen.dart';
 import 'package:sudoku/presentation/screens/settings_screen.dart';
 import 'package:sudoku/presentation/screens/stats_screen.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
+import 'package:sudoku/presentation/widgets/import_sudoku_dialog.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
 import 'package:sudoku/providers/services_provider.dart';
@@ -157,6 +158,14 @@ class HomeScreen extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.bar_chart_outlined),
+                  ),
+                  IconButton(
+                    tooltip: 'Import',
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => const ImportSudokuDialog(),
+                    ),
+                    icon: const Icon(Icons.file_upload_outlined),
                   ),
                   IconButton(
                     tooltip: 'Settings',

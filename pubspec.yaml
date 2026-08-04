@@ -8,15 +8,17 @@ environment:
   flutter: 3.44.1
 
 dependencies:
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   device_info_plus: ^13.2.0
+  file_picker: ^12.0.0-beta.7
   flutter:
     sdk: flutter
-  flutter_riverpod: ^3.3.1
+  flutter_riverpod: ^3.4.2
   hive_ce: ^2.19.3
   hive_ce_flutter: ^2.3.4
-  intl: ^0.20.2
+  intl: ^0.20.3
   package_info_plus: ^10.2.1
+  path_provider: ^2.1.6
   url_launcher: ^6.3.2
 
 dev_dependencies:

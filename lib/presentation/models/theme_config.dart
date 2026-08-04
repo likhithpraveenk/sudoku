@@ -4,14 +4,14 @@ const builtInThemes = [
   ThemeConfig(seedColor: Color(0xFF1C0420)),
   ThemeConfig(seedColor: Color(0xFF7C5CBF)),
   ThemeConfig(seedColor: Color(0xFF5A8A6A)),
+  ThemeConfig(seedColor: Color(0xFFB07840), brightness: .light),
   ThemeConfig(seedColor: Color(0xFF4A6FA5)),
+  ThemeConfig(seedColor: Color(0xFFA8606B), brightness: .light),
   ThemeConfig(seedColor: Color(0xFF4A8A80)),
   ThemeConfig(seedColor: Color(0xFF8A5A7C)),
   ThemeConfig(seedColor: Color(0xFF4A7A8A)),
-  ThemeConfig(seedColor: Color(0xFF5A6AAF)),
-  ThemeConfig(seedColor: Color(0xFFA8606B), brightness: .light),
-  ThemeConfig(seedColor: Color(0xFFB07840), brightness: .light),
   ThemeConfig(seedColor: Color(0xFF9A5A45), brightness: .light),
+  ThemeConfig(seedColor: Color(0xFF5A6AAF)),
 ];
 
 class ThemeConfig {
