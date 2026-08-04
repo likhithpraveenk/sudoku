@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sudoku/data/hive_boxes.dart';
 import 'package:sudoku/presentation/models/theme_config.dart';
+import 'package:sudoku/presentation/shared/no_transition_builder.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
 final themeConfigProvider = NotifierProvider(
@@ -24,6 +26,9 @@ final currentThemeProvider = Provider((ref) {
   final trueBlack = ref.watch(settingsProvider.select((s) => s.trueBlackMode));
   final schemeVariant = ref.watch(
     settingsProvider.select((s) => s.schemeVariant),
+  );
+  final removeAnimations = ref.watch(
+    settingsProvider.select((s) => s.removeAnimations),
   );
 
   ColorScheme colorScheme = ColorScheme.fromSeed(
@@ -54,6 +59,25 @@ final currentThemeProvider = Provider((ref) {
       trackVisibility: WidgetStateProperty.all(false),
     ),
     chipTheme: ChipThemeData(shape: kShape),
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: {
+        .android: removeAnimations
+            ? const NoTransitionBuilder()
+            : const CupertinoPageTransitionsBuilder(),
+        .iOS: removeAnimations
+            ? const NoTransitionBuilder()
+            : const CupertinoPageTransitionsBuilder(),
+        .linux: removeAnimations
+            ? const NoTransitionBuilder()
+            : const FadeUpwardsPageTransitionsBuilder(),
+        .windows: removeAnimations
+            ? const NoTransitionBuilder()
+            : const FadeUpwardsPageTransitionsBuilder(),
+        .macOS: removeAnimations
+            ? const NoTransitionBuilder()
+            : const CupertinoPageTransitionsBuilder(),
+      },
+    ),
   );
 }, name: 'currentThemeProvider');
 

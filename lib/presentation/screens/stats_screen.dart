@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/stat_record.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/stats_provider.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
@@ -100,15 +101,18 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   }
 }
 
-class _DifficultyHeader extends StatelessWidget {
+class _DifficultyHeader extends ConsumerWidget {
   const _DifficultyHeader({required this.pageController, required this.index});
 
   final PageController pageController;
   final int index;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final removeAnimations = ref.watch(
+      settingsProvider.select((s) => s.removeAnimations),
+    );
 
     return Row(
       mainAxisAlignment: .center,
@@ -117,7 +121,9 @@ class _DifficultyHeader extends StatelessWidget {
           icon: const Icon(Icons.chevron_left),
           onPressed: index > 0
               ? () => pageController.previousPage(
-                  duration: const Duration(milliseconds: 250),
+                  duration: removeAnimations
+                      ? Duration.zero
+                      : const Duration(milliseconds: 250),
                   curve: Curves.ease,
                 )
               : null,
@@ -134,7 +140,9 @@ class _DifficultyHeader extends StatelessWidget {
           icon: const Icon(Icons.chevron_right),
           onPressed: index < Difficulty.values.length - 1
               ? () => pageController.nextPage(
-                  duration: const Duration(milliseconds: 250),
+                  duration: removeAnimations
+                      ? Duration.zero
+                      : const Duration(milliseconds: 250),
                   curve: Curves.ease,
                 )
               : null,

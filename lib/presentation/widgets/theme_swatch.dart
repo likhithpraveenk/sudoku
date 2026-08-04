@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudoku/presentation/models/theme_config.dart';
+import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 class ThemeSwatch extends ConsumerWidget {
@@ -12,6 +13,9 @@ class ThemeSwatch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeConfigProvider);
+    final removeAnimations = ref.watch(
+      settingsProvider.select((s) => s.removeAnimations),
+    );
     final active =
         theme.seedColor == config.seedColor &&
         theme.brightness == config.brightness;
@@ -26,7 +30,9 @@ class ThemeSwatch extends ConsumerWidget {
         ref.read(themeConfigProvider.notifier).select(config);
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: removeAnimations
+            ? Duration.zero
+            : const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
         width: 32,
         height: 32,

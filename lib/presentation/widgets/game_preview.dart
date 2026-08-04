@@ -12,6 +12,7 @@ class GamePreview extends StatelessWidget {
     required this.highlightSameDigits,
     this.notesLayout = NotesLayout.grid,
     this.gridSize = 220.0,
+    this.removeAnimations = false,
     super.key,
   });
 
@@ -20,6 +21,7 @@ class GamePreview extends StatelessWidget {
   final bool highlightSameDigits;
   final NotesLayout notesLayout;
   final double gridSize;
+  final bool removeAnimations;
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +134,7 @@ class GamePreview extends StatelessWidget {
         hasNoteOfSameDigit: hasNote,
         maskGivenCells: maskGivenCells,
         notesLayout: notesLayout,
+        removeAnimations: removeAnimations,
       );
     }
 

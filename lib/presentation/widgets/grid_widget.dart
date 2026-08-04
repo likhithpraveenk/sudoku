@@ -119,6 +119,7 @@ class _Cell extends ConsumerWidget {
         hasNoteOfSameDigit: hasNote || isSelected,
         maskGivenCells: maskGivenCells,
         notesLayout: settings.notesLayout,
+        removeAnimations: settings.removeAnimations,
       ),
     );
   }
