@@ -1,0 +1,30 @@
+name: Build Windows
+
+on: workflow_call
+
+jobs:
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: ./pubspec.yaml
+          cache: false
+
+      - run: flutter pub get --enforce-lockfile
+
+      - run: flutter build windows --release --no-pub
+
+      - name: Package as zip
+        run: |
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath sudoku-${{ github.ref_name }}-windows.zip
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: ./*.zip

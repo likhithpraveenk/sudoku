@@ -1,0 +1,41 @@
+name: Build macOS
+
+on: workflow_call
+
+jobs:
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: ./pubspec.yaml
+          cache: false
+
+      - run: flutter pub get --enforce-lockfile
+
+      - run: flutter build macos --release --no-pub
+
+      - name: Package as DMG
+        run: |
+          brew install create-dmg
+          create-dmg \
+            --volname "Sudoku" \
+            --window-size 450 300 \
+            --icon-size 100 \
+            --icon "Sudoku.app" 100 100 \
+            --app-drop-link 300 100 \
+            "sudoku-${{ github.ref_name }}-macos.dmg" \
+            "build/macos/Build/Products/Release/Sudoku.app" || true
+
+      - name: Verify DMG was created
+        run: test -f *.dmg
+
+      - name: Upload macOS Build
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos
+          path: ./*.dmg

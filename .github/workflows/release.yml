@@ -1,4 +1,4 @@
-name: Build & Release All Platforms
+name: Release
 
 on:
   push:
@@ -7,65 +7,20 @@ on:
 
 jobs:
   android:
-    name: Android
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
+    uses: ./.github/workflows/build-android.yml
 
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "21"
+  ios:
+    uses: ./.github/workflows/build-ios.yml
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version-file: ./pubspec.yaml
-          cache: true
+  macos:
+    uses: ./.github/workflows/build-macos.yml
 
-      - run: flutter pub get --enforce-lockfile
-
-      - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
-
-      - name: Patch Dart JNI for Reproducible Build
-        run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' ${PUB_CACHE}/hosted/*/jni-*/src/CMakeLists.txt || true
-
-      - name: Create key.properties
-        run: |
-          cat > android/key.properties <<EOF
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          storeFile=release.keystore
-          EOF
-
-      - name: Build Signed APKs
-        run: flutter build apk --release --split-per-abi --no-pub
-
-      - name: Remove Keystore
-        if: always()
-        run: rm -f android/app/release.keystore
-
-      - name: Rename APKs
-        run: |
-          PREFIX="${{ github.event.repository.name }}-${{ github.ref_name }}"
-          cd build/app/outputs/flutter-apk/
-          mv app-arm64-v8a-release.apk   "${PREFIX}-android-arm64.apk"
-          mv app-armeabi-v7a-release.apk "${PREFIX}-android-armeabi.apk"
-          mv app-x86_64-release.apk      "${PREFIX}-android-x86_64.apk"
-
-      - name: Upload APKs
-        uses: actions/upload-artifact@v7
-        with:
-          name: android
-          path: build/app/outputs/flutter-apk/*.apk
+  windows:
+    uses: ./.github/workflows/build-windows.yml
 
   release:
     name: GitHub Release
-    needs: [android]
+    needs: [android, ios, macos, windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
