@@ -33,15 +33,14 @@ class HomeScreen extends ConsumerWidget {
                     mainAxisAlignment: .center,
                     children: [
                       DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: const .all(.circular(6)),
+                        decoration: const BoxDecoration(
+                          borderRadius: .all(.circular(6)),
                         ),
                         child: Image.asset(
                           'assets/icons/icon.png',
                           width: 160,
                           height: 160,
-                          color: theme.colorScheme.surface,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 36),

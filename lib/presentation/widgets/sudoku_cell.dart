@@ -89,7 +89,7 @@ class SudokuCell extends StatelessWidget {
                     color: highlightColor,
                     borderRadius: .circular(6),
                     border: .all(
-                      width: 1,
+                      width: 2,
                       color: isSelected
                           ? scheme.errorContainer
                           : Colors.transparent,

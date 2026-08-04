@@ -24,7 +24,7 @@ class GameLayout extends StatelessWidget {
     return Column(
       mainAxisAlignment: .end,
       spacing: 16,
-      children: [grid, digitPad, actionRow, const SizedBox(height: 12)],
+      children: [grid, digitPad, actionRow],
     );
   }
 
