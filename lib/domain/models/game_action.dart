@@ -1,5 +1,8 @@
+import 'package:sudoku/domain/models/game_state.dart';
+
 sealed class GameAction {
   const GameAction();
+  GameState undo(GameState state);
 }
 
 class DigitAction extends GameAction {
@@ -17,6 +20,17 @@ class DigitAction extends GameAction {
   final Map<int, Set<int>> previousNotes;
 
   final int newValue;
+
+  @override
+  GameState undo(GameState state) {
+    final newNotes = List<Set<int>>.from(state.notes.map(Set<int>.from));
+    previousNotes.forEach((i, notes) {
+      newNotes[i] = Set<int>.from(notes);
+    });
+    final grid = state.grid.clone()..setValue(cellIndex, previousValue);
+    final trimmed = state.history.sublist(0, state.history.length - 1);
+    return state.copyWith(grid: grid, notes: newNotes, history: trimmed);
+  }
 }
 
 class PencilAction extends GameAction {
@@ -34,6 +48,15 @@ class PencilAction extends GameAction {
   final Set<int> newNotes;
 
   final int previousValue;
+
+  @override
+  GameState undo(GameState state) {
+    final newNotes = List<Set<int>>.from(state.notes.map(Set<int>.from));
+    newNotes[cellIndex] = Set<int>.from(previousNotes);
+    final grid = state.grid.clone()..setValue(cellIndex, previousValue);
+    final trimmed = state.history.sublist(0, state.history.length - 1);
+    return state.copyWith(grid: grid, notes: newNotes, history: trimmed);
+  }
 }
 
 class EraseAction extends GameAction {
@@ -48,10 +71,28 @@ class EraseAction extends GameAction {
   final int previousValue;
 
   final Set<int> previousNotes;
+
+  @override
+  GameState undo(GameState state) {
+    final newNotes = List<Set<int>>.from(state.notes.map(Set<int>.from));
+    newNotes[cellIndex] = Set<int>.from(previousNotes);
+    final grid = state.grid.clone()..setValue(cellIndex, previousValue);
+    final trimmed = state.history.sublist(0, state.history.length - 1);
+    return state.copyWith(grid: grid, notes: newNotes, history: trimmed);
+  }
 }
 
 class AutoNotesAction extends GameAction {
   const AutoNotesAction({required this.previousNotes});
 
   final List<Set<int>> previousNotes;
+
+  @override
+  GameState undo(GameState state) {
+    final trimmed = state.history.sublist(0, state.history.length - 1);
+    return state.copyWith(
+      notes: previousNotes.map(Set<int>.from).toList(),
+      history: trimmed,
+    );
+  }
 }

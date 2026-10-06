@@ -120,36 +120,7 @@ class GameEngine {
 
   void undo() {
     if (!canUndo) return;
-    final action = _state.history.last;
-    final trimmed = _state.history.sublist(0, _state.history.length - 1);
-
-    switch (action) {
-      case DigitAction():
-        final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
-        action.previousNotes.forEach((i, notes) {
-          newNotes[i] = Set<int>.from(notes);
-        });
-        final grid = _state.grid.clone()
-          ..setValue(action.cellIndex, action.previousValue);
-        _state = _state.copyWith(grid: grid, notes: newNotes, history: trimmed);
-      case PencilAction():
-        final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
-        newNotes[action.cellIndex] = Set<int>.from(action.previousNotes);
-        final grid = _state.grid.clone()
-          ..setValue(action.cellIndex, action.previousValue);
-        _state = _state.copyWith(grid: grid, notes: newNotes, history: trimmed);
-      case EraseAction():
-        final newNotes = List<Set<int>>.from(_state.notes.map(Set<int>.from));
-        newNotes[action.cellIndex] = Set<int>.from(action.previousNotes);
-        final grid = _state.grid.clone()
-          ..setValue(action.cellIndex, action.previousValue);
-        _state = _state.copyWith(grid: grid, notes: newNotes, history: trimmed);
-      case AutoNotesAction():
-        _state = _state.copyWith(
-          notes: action.previousNotes.map(Set<int>.from).toList(),
-          history: trimmed,
-        );
-    }
+    _state = _state.history.last.undo(_state);
   }
 
   void revealHint({bool autoRemoveNotes = false}) {

@@ -62,7 +62,7 @@ class GameState {
     puzzle,
     difficulty,
     grid,
-    Object.hashAll(notes.expand((s) => s)),
+    Object.hashAll(notes.map((s) => Object.hashAll(s.toList()..sort()))),
     Object.hashAll(history),
     puzzleComplete,
     elapsed,
@@ -102,6 +102,7 @@ class GameState {
       grid: grid,
       notes: notes,
       history: const [],
+      puzzleComplete: json['puzzleComplete'] as bool? ?? false,
       assists: GameAssists(
         hints: assistsMap['hints'] as bool,
         autoNotes: assistsMap['autoNotes'] as bool,
@@ -122,6 +123,7 @@ class GameState {
       'autoNotes': assists.autoNotes,
       'validation': assists.validation,
     },
+    'puzzleComplete': puzzleComplete,
   };
 
   @override
