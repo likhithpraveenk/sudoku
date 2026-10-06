@@ -14,6 +14,7 @@ import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/stats_provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class GameScreen extends ConsumerWidget {
   const GameScreen({super.key});
@@ -151,11 +152,13 @@ class _GameBodyState extends ConsumerState<_GameBody>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WakelockPlus.enable();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    WakelockPlus.disable();
     super.dispose();
   }
 
