@@ -7,7 +7,7 @@ import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/stats_provider.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
-  const StatsScreen({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<StatsScreen> createState() => _StatsScreenState();
@@ -102,7 +102,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 }
 
 class _DifficultyHeader extends ConsumerWidget {
-  const _DifficultyHeader({required this.pageController, required this.index});
+  const new({required this.pageController, required this.index});
 
   final PageController pageController;
   final int index;
@@ -153,11 +153,7 @@ class _DifficultyHeader extends ConsumerWidget {
 }
 
 class _DifficultyStats extends StatelessWidget {
-  const _DifficultyStats({
-    super.key,
-    required this.difficulty,
-    required this.records,
-  });
+  const new({super.key, required this.difficulty, required this.records});
 
   final Difficulty difficulty;
   final List<StatRecord> records;
@@ -238,7 +234,7 @@ class _DifficultyStats extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value});
+  const new({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -272,7 +268,7 @@ class _StatCard extends StatelessWidget {
 }
 
 class _BestTile extends StatelessWidget {
-  const _BestTile({required this.title, required this.record});
+  const new({required this.title, required this.record});
 
   final String title;
   final StatRecord record;
@@ -296,7 +292,7 @@ class _BestTile extends StatelessWidget {
 }
 
 class _RecordTile extends StatelessWidget {
-  const _RecordTile({required this.record});
+  const new({required this.record});
 
   final StatRecord record;
 

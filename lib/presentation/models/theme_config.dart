@@ -15,9 +15,9 @@ const builtInThemes = [
 ];
 
 class ThemeConfig {
-  const ThemeConfig({required this.seedColor, this.brightness = .dark});
+  const new({required this.seedColor, this.brightness = .dark});
 
-  factory ThemeConfig.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     return ThemeConfig(
       seedColor: Color(json['seedColor'] as int),
       brightness: json['brightness'] == 'light' ? .light : .dark,

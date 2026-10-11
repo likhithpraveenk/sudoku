@@ -47,7 +47,7 @@ class FakeStatsService {
 }
 
 class FakeDifficultyNotifier extends DifficultyProvider {
-  FakeDifficultyNotifier(this._difficulty);
+  new(this._difficulty);
   final Difficulty _difficulty;
 
   @override

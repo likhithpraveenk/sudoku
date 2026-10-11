@@ -4,7 +4,7 @@ import 'package:sudoku/domain/engine/grid_utils.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 class GridBuilder {
-  GridBuilder({Random? random}) : _random = random ?? Random();
+  new({Random? random}) : _random = random ?? Random();
   final Random _random;
 
   SudokuGrid build() {

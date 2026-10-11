@@ -16,7 +16,7 @@ int noOfCluesForDifficulty(Difficulty difficulty) => switch (difficulty) {
 };
 
 class Generator {
-  Generator({Random? random})
+  new({Random? random})
     : _builder = GridBuilder(random: random),
       _random = random ?? Random();
 

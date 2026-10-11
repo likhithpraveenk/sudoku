@@ -1,7 +1,7 @@
 import 'package:sudoku/presentation/shared/input_method.dart';
 
 class BoardState {
-  const BoardState({
+  const new({
     this.selectedCell,
     this.selectedDigit,
     this.inputMode = .number,

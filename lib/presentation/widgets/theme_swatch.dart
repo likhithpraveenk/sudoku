@@ -5,7 +5,7 @@ import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 class ThemeSwatch extends ConsumerWidget {
-  const ThemeSwatch({required this.index, required this.config, super.key});
+  const new({required this.index, required this.config, super.key});
 
   final int index;
   final ThemeConfig config;

@@ -6,7 +6,7 @@ import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 class ThemeSelector extends ConsumerStatefulWidget {
-  const ThemeSelector({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<ThemeSelector> createState() => _ThemeSelectorState();

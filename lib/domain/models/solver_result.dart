@@ -2,7 +2,7 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 class SolverResult {
-  SolverResult({
+  new({
     required this.highestDifficultyLevel,
     required this.techniquesApplied,
     required this.bruteForceUsed,

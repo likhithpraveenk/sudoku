@@ -2,7 +2,7 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
 class StatRecord {
-  const StatRecord({
+  const new({
     required this.difficulty,
     required this.time,
     required this.usedHints,
@@ -20,7 +20,7 @@ class StatRecord {
 
   bool get isClean => !usedHints && !usedAutoNotes && !usedValidation;
 
-  factory StatRecord.fromGameState(GameState state) => StatRecord(
+  factory fromGameState(GameState state) => StatRecord(
     difficulty: state.difficulty,
     time: state.elapsed,
     usedHints: state.assists.hints,
@@ -29,7 +29,7 @@ class StatRecord {
     completedAt: DateTime.now(),
   );
 
-  factory StatRecord.fromJson(Map<String, dynamic> json) => StatRecord(
+  factory fromJson(Map<String, dynamic> json) => StatRecord(
     difficulty: Difficulty.fromValue(json['difficulty'] as int),
     time: Duration(seconds: json['time'] as int),
     usedHints: json['usedHints'] as bool,

@@ -7,7 +7,7 @@ const githubLink = 'https://github.com/likhithpraveenk/sudoku';
 const githubIssueLink = '$githubLink/issues/new';
 
 class AboutScreen extends ConsumerWidget {
-  const AboutScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,8 +42,7 @@ class AboutScreen extends ConsumerWidget {
                 onTap: () => showLicensePage(
                   context: context,
                   applicationName: 'Sudoku',
-                  applicationLegalese:
-                      'Licensed under the GNU General Public License v3.0 or later',
+                  applicationLegalese: 'Licensed under the GNU General Public License v3.0 or later',
                   applicationVersion: '${packageInfo?.version}',
                 ),
               ),
@@ -105,8 +104,7 @@ class AboutScreen extends ConsumerWidget {
 Future<void> launchUrlHelper(BuildContext context, String url) async {
   final uri = Uri.parse(url);
   if (!await launchUrl(uri, mode: .externalApplication) && context.mounted) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Could not launch $url')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Could not launch $url')));
   }
 }

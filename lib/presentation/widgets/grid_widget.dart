@@ -7,7 +7,7 @@ import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
 class GridWidget extends StatelessWidget {
-  const GridWidget({required this.gameState, super.key});
+  const new({required this.gameState, super.key});
 
   final GameState gameState;
 
@@ -50,11 +50,7 @@ class GridWidget extends StatelessWidget {
 }
 
 class _Cell extends ConsumerWidget {
-  const _Cell({
-    required this.index,
-    required this.gameState,
-    required this.size,
-  });
+  const new({required this.index, required this.gameState, required this.size});
   final int index;
   final GameState gameState;
   final double size;

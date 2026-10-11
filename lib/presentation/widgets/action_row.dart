@@ -4,7 +4,7 @@ import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/game_notifier.dart';
 
 class ActionRow extends ConsumerWidget {
-  const ActionRow({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -124,7 +124,7 @@ class ActionRow extends ConsumerWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({
+  const new({
     required this.icon,
     this.onTap,
     this.active = false,

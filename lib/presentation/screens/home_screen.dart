@@ -12,7 +12,7 @@ import 'package:sudoku/providers/difficulty_provider.dart';
 import 'package:sudoku/providers/services_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const new({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);

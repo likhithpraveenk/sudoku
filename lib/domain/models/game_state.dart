@@ -6,7 +6,7 @@ import 'package:sudoku/domain/models/sudoku_grid.dart';
 import 'package:sudoku/domain/models/utils.dart';
 
 class GameState {
-  const GameState({
+  const new({
     required this.puzzle,
     required this.difficulty,
     required this.grid,
@@ -26,16 +26,14 @@ class GameState {
   final Duration elapsed;
   final GameAssists assists;
 
-  factory GameState.newGame({
-    required Puzzle puzzle,
-    required Difficulty difficulty,
-  }) => GameState(
-    puzzle: puzzle,
-    difficulty: difficulty,
-    grid: puzzle.given.clone(),
-    notes: List.generate(81, (_) => {}),
-    history: const [],
-  );
+  factory newGame({required Puzzle puzzle, required Difficulty difficulty}) =>
+      GameState(
+        puzzle: puzzle,
+        difficulty: difficulty,
+        grid: puzzle.given.clone(),
+        notes: List.generate(81, (_) => {}),
+        history: const [],
+      );
 
   GameState copyWith({
     Puzzle? puzzle,
@@ -82,7 +80,7 @@ class GameState {
           elapsed == other.elapsed &&
           assists == other.assists;
 
-  factory GameState.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     final given = SudokuGrid(
       values: List<int>.from(json['givenValues'] as List),
     );

@@ -6,7 +6,7 @@ import 'package:sudoku/presentation/widgets/digit_pad.dart';
 import 'package:sudoku/presentation/widgets/sudoku_cell.dart';
 
 class GamePreview extends StatelessWidget {
-  const GamePreview({
+  const new({
     required this.showRemainingCounts,
     required this.maskGivenCells,
     required this.highlightSameDigits,

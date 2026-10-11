@@ -5,7 +5,7 @@ import 'package:sudoku/presentation/widgets/add_custom_color_sheet.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 class CustomColorsScreen extends ConsumerWidget {
-  const CustomColorsScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +65,7 @@ class CustomColorsScreen extends ConsumerWidget {
 }
 
 class _CustomColorRow extends StatelessWidget {
-  const _CustomColorRow({
+  const new({
     required this.config,
     required this.isActive,
     required this.onTap,

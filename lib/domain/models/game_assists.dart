@@ -1,5 +1,5 @@
 class GameAssists {
-  const GameAssists({
+  const new({
     this.hints = false,
     this.autoNotes = false,
     this.validation = false,

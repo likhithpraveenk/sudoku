@@ -4,7 +4,7 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/stat_record.dart';
 
 class TestStatRecords {
-  const TestStatRecords._();
+  const new _();
 
   static StatRecord record({
     Difficulty difficulty = .easy,

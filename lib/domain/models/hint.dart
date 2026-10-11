@@ -2,7 +2,7 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 abstract class Hint {
-  const Hint();
+  const new();
 
   void apply(SudokuGrid grid);
 
@@ -14,7 +14,7 @@ abstract class Hint {
 }
 
 class DirectHint extends Hint {
-  const DirectHint(this.cellIndex, this.value, this.difficulty);
+  const new(this.cellIndex, this.value, this.difficulty);
 
   final int cellIndex;
 
@@ -42,7 +42,7 @@ class DirectHint extends Hint {
 }
 
 class IndirectHint extends Hint {
-  const IndirectHint(this.cellIndex, this.valuesToRemove, this.difficulty);
+  const new(this.cellIndex, this.valuesToRemove, this.difficulty);
 
   final int cellIndex;
 

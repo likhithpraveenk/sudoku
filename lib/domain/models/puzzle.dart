@@ -3,7 +3,7 @@ import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 @immutable
 class Puzzle {
-  const Puzzle({required this.given, required this.solution});
+  const new({required this.given, required this.solution});
 
   final SudokuGrid given;
 

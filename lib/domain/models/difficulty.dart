@@ -7,7 +7,7 @@ enum Difficulty {
   final int value;
   final String displayName;
 
-  const Difficulty(this.value, this.displayName);
+  new(this.value, this.displayName);
 
   static Difficulty fromValue(int value) {
     return Difficulty.values.firstWhere(

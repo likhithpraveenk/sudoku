@@ -6,7 +6,7 @@ import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 
 class DigitPad extends ConsumerWidget {
-  const DigitPad({required this.state, super.key});
+  const new({required this.state, super.key});
 
   final GameState state;
 
@@ -75,7 +75,7 @@ class DigitPad extends ConsumerWidget {
 }
 
 class DigitButton extends StatelessWidget {
-  const DigitButton({
+  const new({
     required this.digit,
     required this.active,
     required this.count,

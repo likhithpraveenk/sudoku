@@ -1,5 +1,5 @@
 class PuzzleParser {
-  const PuzzleParser();
+  const new();
 
   static final _gap = RegExp('[.xX_]');
   static final _nonDigit = RegExp('[^0-9]');

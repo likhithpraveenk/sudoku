@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 class GameLayout extends StatelessWidget {
-  const GameLayout({
+  const new({
     required this.grid,
     required this.digitPad,
     required this.actionRow,

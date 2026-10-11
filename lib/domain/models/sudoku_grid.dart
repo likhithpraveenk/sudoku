@@ -1,7 +1,7 @@
 import 'package:sudoku/domain/engine/grid_utils.dart';
 
 class SudokuGrid {
-  SudokuGrid({List<int>? values, List<int>? candidates})
+  new({List<int>? values, List<int>? candidates})
     : _values = values ?? List.filled(81, 0),
       _candidates = candidates ?? List.filled(81, 0x1FF) {
     if (candidates == null) {
@@ -16,13 +16,13 @@ class SudokuGrid {
     }
   }
 
-  factory SudokuGrid.fromString(String s) {
+  factory fromString(String s) {
     assert(s.length == 81, 'String length must be 81');
     final values = s.codeUnits.map((c) => c - 48).toList();
     return SudokuGrid(values: values);
   }
 
-  factory SudokuGrid.fromRows(List<List<int>> rows) {
+  factory fromRows(List<List<int>> rows) {
     assert(rows.length == 9, 'Rows must have length 9');
     final values = <int>[];
     for (final row in rows) {

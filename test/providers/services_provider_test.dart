@@ -29,7 +29,7 @@ ProviderContainer _makeContainer({
 }
 
 class _FakeContinueGameNotifier extends ContinueGameNotifier {
-  _FakeContinueGameNotifier(this._value);
+  new(this._value);
   final Map<Difficulty, GameState?> _value;
 
   @override

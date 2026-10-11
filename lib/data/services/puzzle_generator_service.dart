@@ -5,7 +5,7 @@ import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/services/puzzle_generator_service.dart';
 
 class IsolatePuzzleGeneratorService implements PuzzleGeneratorService {
-  const IsolatePuzzleGeneratorService();
+  const new();
 
   @override
   Future<Puzzle> generate(Difficulty difficulty) {

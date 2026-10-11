@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 class NotesGrid extends StatelessWidget {
-  const NotesGrid({
+  const new({
     required this.notes,
     required this.cellSize,
     super.key,
@@ -53,7 +53,7 @@ class NotesGrid extends StatelessWidget {
 }
 
 class _NotesRow extends StatelessWidget {
-  const _NotesRow({
+  const new({
     required this.digits,
     required this.fontSize,
     required this.color,
@@ -88,7 +88,7 @@ class _NotesRow extends StatelessWidget {
 }
 
 class FixedNotesGrid extends StatelessWidget {
-  const FixedNotesGrid({
+  const new({
     required this.notes,
     required this.cellSize,
     super.key,

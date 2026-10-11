@@ -6,7 +6,7 @@ import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
 class SaveGameService {
-  SaveGameService() : _box = Hive.box(gameBox);
+  new() : _box = Hive.box(gameBox);
 
   final Box<String> _box;
 

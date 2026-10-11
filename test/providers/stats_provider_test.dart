@@ -38,7 +38,7 @@ ProviderContainer _makeContainer({
 }
 
 class _TestStatsNotifier extends StatsNotifier {
-  _TestStatsNotifier(this._seed);
+  new(this._seed);
   final Map<Difficulty, List<StatRecord>> _seed;
 
   @override

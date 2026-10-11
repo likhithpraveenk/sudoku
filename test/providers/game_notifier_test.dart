@@ -22,7 +22,7 @@ Future<void> pumpGame(ProviderContainer container) async {
 }
 
 class FakeSettingsNotifier extends SettingsNotifier {
-  FakeSettingsNotifier(this._settings);
+  new(this._settings);
   final AppSettings _settings;
 
   @override

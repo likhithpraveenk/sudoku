@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 class NoTransitionBuilder extends PageTransitionsBuilder {
-  const NoTransitionBuilder();
+  const new();
 
   @override
   Widget buildTransitions<T>(

@@ -16,7 +16,7 @@ enum NotesLayout {
 }
 
 class AppSettings {
-  const AppSettings({
+  const new({
     this.showRemainingCounts = true,
     this.showTimer = true,
     this.maskGivenCells = true,
@@ -60,7 +60,7 @@ class AppSettings {
     removeAnimations: removeAnimations ?? this.removeAnimations,
   );
 
-  factory AppSettings.fromJson(Map<String, dynamic> json) {
+  factory fromJson(Map<String, dynamic> json) {
     return AppSettings(
       showRemainingCounts: json['showRemainingCounts'] as bool? ?? true,
       showTimer: json['showTimer'] as bool? ?? true,

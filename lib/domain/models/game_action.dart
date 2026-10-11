@@ -1,12 +1,12 @@
 import 'package:sudoku/domain/models/game_state.dart';
 
 sealed class GameAction {
-  const GameAction();
+  const new();
   GameState undo(GameState state);
 }
 
 class DigitAction extends GameAction {
-  const DigitAction({
+  const new({
     required this.cellIndex,
     required this.previousValue,
     required this.previousNotes,
@@ -34,7 +34,7 @@ class DigitAction extends GameAction {
 }
 
 class PencilAction extends GameAction {
-  const PencilAction({
+  const new({
     required this.cellIndex,
     required this.previousNotes,
     required this.newNotes,
@@ -60,7 +60,7 @@ class PencilAction extends GameAction {
 }
 
 class EraseAction extends GameAction {
-  const EraseAction({
+  const new({
     required this.cellIndex,
     required this.previousValue,
     required this.previousNotes,
@@ -83,7 +83,7 @@ class EraseAction extends GameAction {
 }
 
 class AutoNotesAction extends GameAction {
-  const AutoNotesAction({required this.previousNotes});
+  const new({required this.previousNotes});
 
   final List<Set<int>> previousNotes;
 

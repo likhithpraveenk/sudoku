@@ -17,7 +17,7 @@ import 'package:sudoku/providers/stats_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class GameScreen extends ConsumerWidget {
-  const GameScreen({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -146,7 +146,7 @@ class GameScreen extends ConsumerWidget {
 }
 
 class _GameBody extends ConsumerStatefulWidget {
-  const _GameBody({required this.state});
+  const new({required this.state});
   final GameState state;
 
   @override

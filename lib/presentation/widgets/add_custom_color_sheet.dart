@@ -4,7 +4,7 @@ import 'package:sudoku/presentation/models/theme_config.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
 class AddCustomColorSheet extends ConsumerStatefulWidget {
-  const AddCustomColorSheet({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<AddCustomColorSheet> createState() =>
@@ -132,7 +132,7 @@ class _AddCustomColorSheetState extends ConsumerState<AddCustomColorSheet> {
 }
 
 class PreviewDot extends StatelessWidget {
-  const PreviewDot({
+  const new({
     required this.color,
     required this.outline,
     required this.label,
@@ -162,9 +162,8 @@ class PreviewDot extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: textColor),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: textColor),
         ),
       ],
     );

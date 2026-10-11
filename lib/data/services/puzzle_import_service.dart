@@ -7,7 +7,7 @@ import 'package:sudoku/domain/models/puzzle.dart';
 import 'package:sudoku/domain/models/sudoku_grid.dart';
 
 class PuzzleImportService {
-  PuzzleImportService({this.parser = const PuzzleParser()});
+  new({this.parser = const PuzzleParser()});
 
   final PuzzleParser parser;
 

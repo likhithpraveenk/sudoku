@@ -7,7 +7,7 @@ import 'package:sudoku/presentation/screens/game_screen.dart';
 import 'package:sudoku/providers/services_provider.dart';
 
 class ImportSudokuDialog extends ConsumerStatefulWidget {
-  const ImportSudokuDialog({super.key});
+  const new({super.key});
 
   @override
   ConsumerState<ImportSudokuDialog> createState() => _ImportSudokuState();
@@ -51,8 +51,7 @@ class _ImportSudokuState extends ConsumerState<ImportSudokuDialog> {
               controller: controller,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText:
-                    'Paste 81-digit puzzle here. The gaps can be `0`, `.`, `x`, `X`, `_`',
+                hintText: 'Paste 81-digit puzzle here. The gaps can be `0`, `.`, `x`, `X`, `_`',
                 border: const OutlineInputBorder(),
                 errorText: errorText,
                 errorMaxLines: 4,

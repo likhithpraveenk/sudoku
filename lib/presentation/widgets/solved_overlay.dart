@@ -42,7 +42,7 @@ void showSolvedOverlay(BuildContext context, WidgetRef ref, StatRecord record) {
 }
 
 class SolvedOverlay extends StatelessWidget {
-  const SolvedOverlay({
+  const new({
     required this.record,
     required this.displayList,
     required this.currentRecordIndex,

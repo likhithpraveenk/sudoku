@@ -4,7 +4,7 @@ import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 
 class GameEngine {
-  GameEngine(this._initialState) {
+  new(this._initialState) {
     _state = _initialState;
   }
 
