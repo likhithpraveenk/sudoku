@@ -105,6 +105,18 @@ class GameNotifier extends AsyncNotifier<GameState?> {
 
   Future<void> restart() => _mutate((engine) => engine.restart());
 
+  Future<void> newGame() async {
+    _session?.pauseTimer();
+    final difficulty = ref.read(difficultyProvider);
+    await ref.read(saveGameServiceProvider).delete(difficulty);
+    state = const AsyncLoading();
+    final initialState = await _generateNew(difficulty);
+    _gameEngine = GameEngine(initialState);
+    _session?.reset();
+    _session?.startTimer();
+    state = AsyncData(_gameEngine!.currentState);
+  }
+
   bool get canUndo => _gameEngine?.canUndo == true;
 
   Future<void> _mutate(void Function(GameEngine engine) operation) async {

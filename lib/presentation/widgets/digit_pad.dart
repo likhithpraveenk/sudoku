@@ -48,7 +48,7 @@ class DigitPad extends ConsumerWidget {
           DigitButton(
             digit: 'X',
             active: false,
-            count: 9,
+            count: 0,
             showCount: false,
             onTap: () {
               if (state.puzzleComplete) return;

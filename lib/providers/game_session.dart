@@ -52,6 +52,11 @@ class GameSession {
     });
   }
 
+  void reset() {
+    _complete = false;
+    _state = null;
+  }
+
   void pauseTimer() => _timer?.cancel();
 
   Future<void> dispose() {

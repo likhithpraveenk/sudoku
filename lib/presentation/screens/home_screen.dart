@@ -9,6 +9,7 @@ import 'package:sudoku/presentation/shared/utils.dart';
 import 'package:sudoku/presentation/widgets/import_sudoku_dialog.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
+import 'package:sudoku/providers/game_notifier.dart';
 import 'package:sudoku/providers/services_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -82,9 +83,7 @@ class HomeScreen extends ConsumerWidget {
                         width: double.infinity,
                         child: FilledButton(
                           onPressed: () async {
-                            await ref
-                                .read(saveGameServiceProvider)
-                                .delete(difficulty);
+                            await ref.read(gameProvider.notifier).newGame();
                             if (context.mounted) {
                               Navigator.of(context).push(
                                 MaterialPageRoute<void>(

@@ -240,6 +240,39 @@ void main() {
       });
     });
 
+    group('newGame', () {
+      test('deletes the selected difficulty slot', () async {
+        final saves = FakeSaveGameService();
+        container = _makeContainer(saveGameService: saves);
+        await pumpGame(container);
+
+        await container.read(gameProvider.notifier).newGame();
+
+        expect(saves.deletedDifficulties, [Difficulty.easy]);
+      });
+
+      test('generates a fresh puzzle with empty history', () async {
+        await pumpGame(container);
+
+        await container.read(gameProvider.notifier).newGame();
+
+        final state = readState(container);
+        expect(state.history, isEmpty);
+        expect(state.elapsed, Duration.zero);
+      });
+
+      test('restarts the clock after a completed game', () async {
+        await pumpGame(container);
+        await solve(container);
+        expect(readState(container).puzzleComplete, isTrue);
+
+        await container.read(gameProvider.notifier).newGame();
+        await Future<void>.delayed(kTick);
+
+        expect(readState(container).elapsed, greaterThan(Duration.zero));
+      });
+    });
+
     group('inputDigit routing', () {
       test('number mode writes grid value', () async {
         await pumpGame(container);
