@@ -43,6 +43,17 @@ class StatsNotifier extends Notifier<Map<Difficulty, List<StatRecord>>> {
     unawaited(_persist(record.difficulty));
   }
 
+  Future<void> persistRecord(StatRecord record) async {
+    final current = state[record.difficulty] ?? const <StatRecord>[];
+    if (!current.any((r) => r.completedAt == record.completedAt)) {
+      state = {
+        ...state,
+        record.difficulty: [...current, record],
+      };
+    }
+    await _persist(record.difficulty);
+  }
+
   Future<void> _persist(Difficulty d) async {
     final list = state[d]!;
     await _box.put(d.name, list.map((r) => r.toJson()).toList());

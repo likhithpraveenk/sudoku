@@ -3,13 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
+import 'package:sudoku/domain/models/stat_record.dart';
 import 'package:sudoku/domain/services/puzzle_generator_service.dart';
 import 'package:sudoku/presentation/models/app_settings.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
 import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/game_session.dart';
 import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
+import 'package:sudoku/providers/stats_provider.dart';
 
 import '../helpers/fake_services.dart';
 import '../helpers/sudoku_grids.dart';
@@ -19,6 +22,8 @@ GameState readState(ProviderContainer container) =>
 
 Future<void> pumpGame(ProviderContainer container) async {
   await container.read(gameProvider.future);
+  // Keep a listener alive to prevent autoDispose from disposing the provider.
+  container.listen(gameProvider, (_, _) {});
 }
 
 class FakeSettingsNotifier extends SettingsNotifier {
@@ -27,6 +32,34 @@ class FakeSettingsNotifier extends SettingsNotifier {
 
   @override
   AppSettings build() => _settings;
+}
+
+class FakeStatsNotifier extends StatsNotifier {
+  @override
+  Map<Difficulty, List<StatRecord>> build() => {
+    for (final d in Difficulty.values) d: <StatRecord>[],
+  };
+
+  @override
+  void add(StatRecord record) {
+    final current = state[record.difficulty] ?? const <StatRecord>[];
+    state = {
+      ...state,
+      record.difficulty: [...current, record],
+    };
+  }
+
+  @override
+  Future<void> persistRecord(StatRecord record) async {
+    // In-memory only for tests
+    final current = state[record.difficulty] ?? const <StatRecord>[];
+    if (!current.any((r) => r.completedAt == record.completedAt)) {
+      state = {
+        ...state,
+        record.difficulty: [...current, record],
+      };
+    }
+  }
 }
 
 class MockPuzzleGeneratorService implements PuzzleGeneratorService {
@@ -59,9 +92,22 @@ ProviderContainer _makeContainer({
       saveGameServiceProvider.overrideWithValue(
         saveGameService ?? FakeSaveGameService(),
       ),
+      statsNotifierProvider.overrideWith(FakeStatsNotifier.new),
       difficultyProvider.overrideWith(() => FakeDifficultyNotifier(difficulty)),
     ],
   );
+}
+
+Future<void> solve(ProviderContainer container) async {
+  final state = readState(container);
+  final solution = state.puzzle.solution;
+  final given = state.puzzle.given;
+  final notifier = container.read(gameProvider.notifier);
+  for (var i = 0; i < 81; i++) {
+    if (given.valueAt(i) == 0) {
+      await notifier.inputDigit(i, solution.valueAt(i), inputMode: .number);
+    }
+  }
 }
 
 void main() {
@@ -123,13 +169,51 @@ void main() {
       expect(readState(container).elapsed, Duration.zero);
     });
 
+    test('starts the elapsed clock', () async {
+      await pumpGame(container);
+
+      await Future<void>.delayed(kTick);
+
+      expect(readState(container).elapsed, greaterThan(Duration.zero));
+    });
+
+    group('persistence', () {
+      test('a mutation saves the game', () async {
+        final saves = FakeSaveGameService();
+        container = _makeContainer(saveGameService: saves);
+        await pumpGame(container);
+
+        await container
+            .read(gameProvider.notifier)
+            .inputDigit(2, 4, inputMode: .number);
+
+        expect(saves.saveCalls, greaterThan(0));
+      });
+
+      test('solving the puzzle records a stat and clears the save', () async {
+        final saves = FakeSaveGameService();
+        container = _makeContainer(saveGameService: saves);
+        await pumpGame(container);
+
+        await solve(container);
+
+        expect(readState(container).puzzleComplete, isTrue);
+        expect(saves.deletedDifficulties, [Difficulty.easy]);
+        expect(
+          container.read(statsNotifierProvider)[Difficulty.easy],
+          hasLength(1),
+        );
+      });
+    });
+
     group('restart', () {
       test('resets grid to given puzzle', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 4, inputMode: .number)
-          ..restart();
+        await container
+            .read(gameProvider.notifier)
+            .inputDigit(2, 4, inputMode: .number);
+        await container.read(gameProvider.notifier).restart();
 
         expect(readState(container).grid.valueAt(2), 0);
       });
@@ -137,9 +221,10 @@ void main() {
       test('clears history', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 4, inputMode: .number)
-          ..restart();
+        await container
+            .read(gameProvider.notifier)
+            .inputDigit(2, 4, inputMode: .number);
+        await container.read(gameProvider.notifier).restart();
 
         expect(readState(container).history, isEmpty);
       });
@@ -149,7 +234,7 @@ void main() {
 
         final puzzleBefore = readState(container).puzzle;
 
-        container.read(gameProvider.notifier).restart();
+        await container.read(gameProvider.notifier).restart();
 
         expect(readState(container).puzzle, puzzleBefore);
       });
@@ -159,7 +244,7 @@ void main() {
       test('number mode writes grid value', () async {
         await pumpGame(container);
 
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(2, 4, inputMode: .number);
 
@@ -171,7 +256,7 @@ void main() {
 
         container.read(boardProvider.notifier).toggleInputMode();
 
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(2, 4, inputMode: .pencil);
 
@@ -186,11 +271,11 @@ void main() {
         await pumpGame(container);
 
         container.read(boardProvider.notifier).toggleInputMode();
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(5, 4, inputMode: .pencil);
         container.read(boardProvider.notifier).toggleInputMode();
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(2, 4, inputMode: .number);
 
@@ -202,10 +287,10 @@ void main() {
       test('erases the given cell index', () async {
         await pumpGame(container);
 
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(2, 4, inputMode: .number);
-        container.read(gameProvider.notifier).erase(2);
+        await container.read(gameProvider.notifier).erase(2);
 
         expect(readState(container).grid.valueAt(2), 0);
       });
@@ -214,10 +299,10 @@ void main() {
         await pumpGame(container);
 
         container.read(boardProvider.notifier).selectCell(2);
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(2, 4, inputMode: .number);
-        container.read(gameProvider.notifier).erase(2);
+        await container.read(gameProvider.notifier).erase(2);
 
         expect(readState(container).grid.valueAt(2), 0);
       });
@@ -231,9 +316,10 @@ void main() {
         final correct = solution.valueAt(2);
         final wrong = correct == 9 ? 1 : correct + 1;
 
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, wrong, inputMode: .number)
-          ..runValidation();
+        await container
+            .read(gameProvider.notifier)
+            .inputDigit(2, wrong, inputMode: .number);
+        await container.read(gameProvider.notifier).runValidation();
 
         expect(container.read(boardProvider).errorCells, contains(2));
       });
@@ -241,7 +327,7 @@ void main() {
       test('clears error cells for valid grid', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier).runValidation();
+        await container.read(gameProvider.notifier).runValidation();
 
         expect(container.read(boardProvider).errorCells, isEmpty);
       });
@@ -249,7 +335,7 @@ void main() {
       test('sets assists.validation on state', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier).runValidation();
+        await container.read(gameProvider.notifier).runValidation();
 
         expect(readState(container).assists.validation, isTrue);
       });
@@ -265,7 +351,7 @@ void main() {
       test('true after action', () async {
         await pumpGame(container);
 
-        container
+        await container
             .read(gameProvider.notifier)
             .inputDigit(2, 4, inputMode: .number);
 
@@ -275,9 +361,10 @@ void main() {
       test('false after undo clears last action', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier)
-          ..inputDigit(2, 4, inputMode: .number)
-          ..undo();
+        await container
+            .read(gameProvider.notifier)
+            .inputDigit(2, 4, inputMode: .number);
+        await container.read(gameProvider.notifier).undo();
 
         expect(container.read(gameProvider.notifier).canUndo, isFalse);
       });
@@ -287,7 +374,7 @@ void main() {
       test('sets assists.hints to true', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier).hint();
+        await container.read(gameProvider.notifier).hint();
 
         expect(readState(container).assists.hints, isTrue);
       });
@@ -297,7 +384,7 @@ void main() {
       test('sets assists.autoNotes to true', () async {
         await pumpGame(container);
 
-        container.read(gameProvider.notifier).applyAutoNotes();
+        await container.read(gameProvider.notifier).applyAutoNotes();
 
         expect(readState(container).assists.autoNotes, isTrue);
       });

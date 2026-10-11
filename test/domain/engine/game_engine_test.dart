@@ -3,7 +3,7 @@ import 'package:sudoku/domain/engine/game_engine.dart';
 import 'package:sudoku/domain/models/game_action.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/puzzle.dart';
-import 'package:sudoku/providers/game_notifier.dart';
+import 'package:sudoku/providers/game_session.dart';
 
 import '../../helpers/sudoku_grids.dart';
 

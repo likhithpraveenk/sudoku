@@ -8,6 +8,7 @@ import 'package:sudoku/domain/models/stat_record.dart';
 import 'package:sudoku/presentation/shared/input_method.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
+import 'package:sudoku/providers/game_session.dart';
 import 'package:sudoku/providers/services_provider.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/stats_provider.dart';
@@ -25,36 +26,33 @@ final isFinishedProvider = Provider.autoDispose((ref) {
   return puzzleComplete == true;
 }, name: 'isFinishedProvider');
 
-const kTick = Duration(seconds: 1);
-
 class GameNotifier extends AsyncNotifier<GameState?> {
   GameEngine? _gameEngine;
-  Timer? _timer;
+  GameSession? _session;
   bool _disposed = false;
 
   @override
   Future<GameState?> build() async {
-    final saveGameService = ref.read(saveGameServiceProvider);
+    final session = GameSession(
+      saveGameService: ref.read(saveGameServiceProvider),
+      onRecord: _recordCompletion,
+      onPersistStat: _persistCompletion,
+      onTick: _tick,
+    );
+    _session = session;
+
     ref.onDispose(() {
       _disposed = true;
-      _timer?.cancel();
-      final engine = _gameEngine;
-      if (engine != null) {
-        final current = engine.currentState;
-        if (current.puzzleComplete) {
-          saveGameService.delete(current.difficulty);
-        } else {
-          saveGameService.save(current);
-        }
-      }
+      unawaited(session.dispose());
     });
 
     final difficulty = ref.read(difficultyProvider);
+    final saveGameService = ref.read(saveGameServiceProvider);
     final saved = saveGameService.load(difficulty);
     final initialState = saved ?? await _generateNew(difficulty);
 
     _gameEngine = GameEngine(initialState);
-    startTimer();
+    session.startTimer();
     return _gameEngine?.currentState;
   }
 
@@ -65,80 +63,76 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     return GameState.newGame(puzzle: puzzle, difficulty: difficulty);
   }
 
-  void startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(kTick, (_) {
-      if (_disposed) return;
-      _gameEngine?.tick(kTick);
-      state = AsyncData(_gameEngine?.currentState);
+  void startTimer() => _session?.startTimer();
+
+  void pauseTimer() => _session?.pauseTimer();
+
+  Future<void> inputDigit(
+    int cellIndex,
+    int digit, {
+    required InputMode inputMode,
+  }) {
+    final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
+    return _mutate((engine) {
+      if (inputMode == .number) {
+        engine.inputDigit(cellIndex, digit, autoRemoveNotes: autoRemoveNotes);
+      } else {
+        engine.toggleNote(cellIndex, digit);
+      }
     });
   }
 
-  void pauseTimer() {
-    _timer?.cancel();
-  }
+  Future<void> erase(int cellIndex) =>
+      _mutate((engine) => engine.erase(cellIndex));
 
-  void inputDigit(int cellIndex, int digit, {required InputMode inputMode}) {
-    if (inputMode == .number) {
-      final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
-      _gameEngine?.inputDigit(
-        cellIndex,
-        digit,
-        autoRemoveNotes: autoRemoveNotes,
-      );
-    } else {
-      _gameEngine?.toggleNote(cellIndex, digit);
-    }
-    state = AsyncData(_gameEngine?.currentState);
-    if (_gameEngine?.currentState.puzzleComplete == true) {
-      _onPuzzleComplete();
-    }
-  }
+  Future<void> undo() => _mutate((engine) => engine.undo());
 
-  void erase(int cellIndex) {
-    _gameEngine?.erase(cellIndex);
-    state = AsyncData(_gameEngine?.currentState);
-  }
-
-  void undo() {
-    _gameEngine?.undo();
-    state = AsyncData(_gameEngine?.currentState);
-  }
-
-  void hint() {
+  Future<void> hint() {
     final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
-    _gameEngine?.revealHint(autoRemoveNotes: autoRemoveNotes);
-    state = AsyncData(_gameEngine?.currentState);
-    if (_gameEngine?.currentState.puzzleComplete == true) {
-      _onPuzzleComplete();
-    }
+    return _mutate(
+      (engine) => engine.revealHint(autoRemoveNotes: autoRemoveNotes),
+    );
   }
 
-  void _onPuzzleComplete() {
-    _timer?.cancel();
-    final completed = _gameEngine?.currentState;
-    if (completed != null) {
-      final record = StatRecord.fromGameState(completed);
-      ref.read(lastCompletionRecordProvider.notifier).state = record;
-      ref.read(statsNotifierProvider.notifier).add(record);
-    }
+  Future<void> runValidation() {
+    return _mutate((engine) {
+      final errors = engine.findErrors();
+      ref.read(boardProvider.notifier).setErrorCells(errors);
+    });
   }
 
-  void runValidation() {
-    final errors = _gameEngine?.findErrors();
-    ref.read(boardProvider.notifier).setErrorCells(errors ?? {});
-    state = AsyncData(_gameEngine?.currentState);
-  }
+  Future<void> applyAutoNotes() => _mutate((engine) => engine.autoFillNotes());
 
-  void applyAutoNotes() {
-    _gameEngine?.autoFillNotes();
-    state = AsyncData(_gameEngine?.currentState);
-  }
-
-  void restart() {
-    _gameEngine?.restart();
-    state = AsyncData(_gameEngine?.currentState);
-  }
+  Future<void> restart() => _mutate((engine) => engine.restart());
 
   bool get canUndo => _gameEngine?.canUndo == true;
+
+  Future<void> _mutate(void Function(GameEngine engine) operation) async {
+    final engine = _gameEngine;
+    if (engine == null) return;
+    operation(engine);
+    await _publish(engine);
+  }
+
+  Future<void> _publish(GameEngine engine) async {
+    state = AsyncData(engine.currentState);
+    await _session?.onMutated(engine.currentState);
+  }
+
+  void _tick() {
+    if (_disposed) return;
+    final engine = _gameEngine;
+    if (engine == null) return;
+    engine.tick(kTick);
+    state = AsyncData(engine.currentState);
+  }
+
+  void _recordCompletion(StatRecord record) {
+    ref.read(lastCompletionRecordProvider.notifier).state = record;
+    ref.read(statsNotifierProvider.notifier).add(record);
+  }
+
+  Future<void> _persistCompletion(StatRecord record) async {
+    await ref.read(statsNotifierProvider.notifier).persistRecord(record);
+  }
 }

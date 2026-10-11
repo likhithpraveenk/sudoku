@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sudoku/providers/board_notifier.dart';
@@ -72,7 +74,7 @@ class ActionRow extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      notifier.restart();
+      unawaited(notifier.restart());
       boardNotifier.reset();
     }
   }
