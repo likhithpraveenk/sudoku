@@ -19,6 +19,21 @@ void main() {
       },
     );
 
+    test('importPuzzle parses raw input then loads it', () async {
+      final service = PuzzleImportService();
+      final result = await service.importPuzzle(TestPuzzles.valid9Line);
+      expect(result, isA<GameState>());
+      expect(result.difficulty, equals(Difficulty.easy));
+    });
+
+    test('importPuzzle throws when raw input is not 81 digits', () async {
+      final service = PuzzleImportService();
+      expect(
+        () => service.importPuzzle(TestPuzzles.tooShort),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('sharePuzzle does not throw', () async {
       TestWidgetsFlutterBinding.ensureInitialized();
       final service = PuzzleImportService();

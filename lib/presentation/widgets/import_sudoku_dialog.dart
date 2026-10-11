@@ -1,7 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:sudoku/domain/engine/game_utils.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/screens/game_screen.dart';
@@ -108,9 +107,8 @@ class _ImportSudokuState extends ConsumerState<ImportSudokuDialog> {
             if (raw.isEmpty) return;
 
             try {
-              final puzzleString = parsePuzzleInput(raw);
               final service = ref.read(puzzleImportServiceProvider);
-              final state = await service.loadPuzzleIntoGame(puzzleString);
+              final state = await service.importPuzzle(raw);
               setState(() {
                 computedDifficulty = state.difficulty;
                 validPuzzle = state;
