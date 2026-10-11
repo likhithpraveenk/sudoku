@@ -99,7 +99,11 @@ class _Cell extends ConsumerWidget {
         if (board.selectedDigit != null) {
           ref
               .read(gameProvider.notifier)
-              .inputDigit(index, board.selectedDigit!);
+              .inputDigit(
+                index,
+                board.selectedDigit!,
+                inputMode: board.inputMode,
+              );
         } else {
           ref.read(boardProvider.notifier).selectCell(index);
         }

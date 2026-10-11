@@ -83,7 +83,10 @@ class GameScreen extends ConsumerWidget {
                         }
                         return .handled;
                       case .backspace || .delete:
-                        gameNotifier.erase();
+                        final cell = board.selectedCell;
+                        if (cell != null) {
+                          gameNotifier.erase(cell);
+                        }
                         return .handled;
                       default:
                     }
@@ -91,7 +94,11 @@ class GameScreen extends ConsumerWidget {
                       final d = int.tryParse(key.keyLabel);
                       if (d != null && d >= 1 && d <= 9) {
                         if (board.selectedCell != null) {
-                          gameNotifier.inputDigit(board.selectedCell!, d);
+                          gameNotifier.inputDigit(
+                            board.selectedCell!,
+                            d,
+                            inputMode: board.inputMode,
+                          );
                         } else {
                           boardNotifier.selectDigit(d);
                         }

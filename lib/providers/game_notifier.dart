@@ -5,7 +5,7 @@ import 'package:sudoku/domain/engine/game_engine.dart';
 import 'package:sudoku/domain/models/difficulty.dart';
 import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/domain/models/stat_record.dart';
-import 'package:sudoku/presentation/models/board_state.dart';
+import 'package:sudoku/presentation/shared/input_method.dart';
 import 'package:sudoku/providers/board_notifier.dart';
 import 'package:sudoku/providers/difficulty_provider.dart';
 import 'package:sudoku/providers/services_provider.dart';
@@ -30,7 +30,6 @@ const kTick = Duration(seconds: 1);
 class GameNotifier extends AsyncNotifier<GameState?> {
   GameEngine? _gameEngine;
   Timer? _timer;
-  BoardState get board => ref.read(boardProvider);
   bool _disposed = false;
 
   @override
@@ -79,8 +78,8 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     _timer?.cancel();
   }
 
-  void inputDigit(int cellIndex, int digit) {
-    if (board.inputMode == .number) {
+  void inputDigit(int cellIndex, int digit, {required InputMode inputMode}) {
+    if (inputMode == .number) {
       final autoRemoveNotes = ref.read(settingsProvider).autoRemoveNotes;
       _gameEngine?.inputDigit(
         cellIndex,
@@ -96,12 +95,8 @@ class GameNotifier extends AsyncNotifier<GameState?> {
     }
   }
 
-  void erase([int? index]) {
-    if (index != null) {
-      _gameEngine?.erase(index);
-    } else if (board.selectedCell != null) {
-      _gameEngine?.erase(board.selectedCell!);
-    }
+  void erase(int cellIndex) {
+    _gameEngine?.erase(cellIndex);
     state = AsyncData(_gameEngine?.currentState);
   }
 

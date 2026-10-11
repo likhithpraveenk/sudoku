@@ -34,7 +34,11 @@ class DigitPad extends ConsumerWidget {
             onTap: () {
               if (state.puzzleComplete) return;
               if (board.selectedCell != null) {
-                gameNotifier.inputDigit(board.selectedCell!, digit);
+                gameNotifier.inputDigit(
+                  board.selectedCell!,
+                  digit,
+                  inputMode: board.inputMode,
+                );
               } else {
                 boardNotifier.selectDigit(digit);
               }
@@ -46,7 +50,13 @@ class DigitPad extends ConsumerWidget {
             active: false,
             count: 9,
             showCount: false,
-            onTap: gameNotifier.erase,
+            onTap: () {
+              if (state.puzzleComplete) return;
+              final cell = board.selectedCell;
+              if (cell != null) {
+                gameNotifier.erase(cell);
+              }
+            },
           ),
         );
 
