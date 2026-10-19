@@ -25,6 +25,7 @@ class AppSettings {
     this.trueBlackMode = false,
     this.schemeVariant = .tonalSpot,
     this.notesLayout = .grid,
+    this.gridTopSpacingFraction = 1.0,
     this.removeAnimations = false,
   });
 
@@ -36,6 +37,7 @@ class AppSettings {
   final bool trueBlackMode;
   final DynamicSchemeVariant schemeVariant;
   final NotesLayout notesLayout;
+  final double gridTopSpacingFraction;
   final bool removeAnimations;
 
   AppSettings copyWith({
@@ -47,6 +49,7 @@ class AppSettings {
     bool? trueBlackMode,
     DynamicSchemeVariant? schemeVariant,
     NotesLayout? notesLayout,
+    double? gridTopSpacingFraction,
     bool? removeAnimations,
   }) => AppSettings(
     showRemainingCounts: showRemainingCounts ?? this.showRemainingCounts,
@@ -57,6 +60,8 @@ class AppSettings {
     trueBlackMode: trueBlackMode ?? this.trueBlackMode,
     schemeVariant: schemeVariant ?? this.schemeVariant,
     notesLayout: notesLayout ?? this.notesLayout,
+    gridTopSpacingFraction:
+        gridTopSpacingFraction ?? this.gridTopSpacingFraction,
     removeAnimations: removeAnimations ?? this.removeAnimations,
   );
 
@@ -76,6 +81,8 @@ class AppSettings {
         (v) => v.name == json['notesLayout'],
         orElse: () => .grid,
       ),
+      gridTopSpacingFraction:
+          (json['gridTopSpacingFraction'] as num?)?.toDouble() ?? 1.0,
       removeAnimations: json['removeAnimations'] as bool? ?? false,
     );
   }
@@ -89,6 +96,7 @@ class AppSettings {
     'trueBlackMode': trueBlackMode,
     'schemeVariant': schemeVariant.name,
     'notesLayout': notesLayout.name,
+    'gridTopSpacingFraction': gridTopSpacingFraction,
     'removeAnimations': removeAnimations,
   };
 }

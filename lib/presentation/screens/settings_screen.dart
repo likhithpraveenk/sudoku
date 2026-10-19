@@ -2,24 +2,86 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sudoku/presentation/models/app_settings.dart';
 import 'package:sudoku/presentation/screens/custom_colors_screen.dart';
+import 'package:sudoku/presentation/screens/preview_overlay.dart';
 import 'package:sudoku/presentation/widgets/game_preview.dart';
 import 'package:sudoku/presentation/widgets/theme_selector.dart';
 import 'package:sudoku/providers/settings_provider.dart';
 import 'package:sudoku/providers/theme_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  final PreviewOverlay _previewOverlay = PreviewOverlay();
+  final ValueNotifier<double> _previewFraction = ValueNotifier(1);
+  double? _dragFraction;
+
+  @override
+  void dispose() {
+    _previewOverlay.hide();
+    _previewFraction.dispose();
+    super.dispose();
+  }
+
+  void _showLayoutPreview() {
+    if (_previewOverlay.visible) return;
+    _previewOverlay.show(
+      context,
+      (_) => ValueListenableBuilder<double>(
+        valueListenable: _previewFraction,
+        builder: (_, fraction, _) =>
+            GamePreviewScreen(gridTopSpacingFraction: fraction),
+      ),
+    );
+  }
+
+  void _onGridSpacingDragStart(double value) {
+    setState(() => _dragFraction = value);
+    _previewFraction.value = value;
+    _showLayoutPreview();
+  }
+
+  void _onGridSpacingDrag(double value) {
+    setState(() => _dragFraction = value);
+    _previewFraction.value = value;
+    _showLayoutPreview();
+  }
+
+  void _onGridSpacingDragEnd(double value) {
+    setState(() => _dragFraction = null);
+    _previewOverlay.hide();
+    ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(gridTopSpacingFraction: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
+    final gridSpacingFraction =
+        (_dragFraction ?? settings.gridTopSpacingFraction).clamp(0.0, 1.0);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        actions: const [ThemeSelector()],
+        actions: [
+          const ThemeSelector(),
+          IconButton(
+            tooltip: 'Game layout preview',
+            icon: const Icon(Icons.visibility_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const GamePreviewScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const .only(bottom: 48),
@@ -103,21 +165,18 @@ class SettingsScreen extends ConsumerWidget {
                     crossAxisAlignment: .start,
                     children: [
                       Text(
-                        'Preview',
+                        'Grid top spacing (portrait)',
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                           fontWeight: .bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: GamePreview(
-                          showRemainingCounts: settings.showRemainingCounts,
-                          maskGivenCells: settings.maskGivenCells,
-                          highlightSameDigits: settings.highlightSameDigits,
-                          notesLayout: settings.notesLayout,
-                          removeAnimations: settings.removeAnimations,
-                        ),
+                      Slider(
+                        value: gridSpacingFraction,
+                        label: '${(gridSpacingFraction * 100).round()}%',
+                        onChangeStart: _onGridSpacingDragStart,
+                        onChanged: _onGridSpacingDrag,
+                        onChangeEnd: _onGridSpacingDragEnd,
                       ),
                     ],
                   ),

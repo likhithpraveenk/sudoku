@@ -58,6 +58,9 @@ final currentThemeProvider = Provider((ref) {
       thumbVisibility: WidgetStateProperty.all(false),
       trackVisibility: WidgetStateProperty.all(false),
     ),
+    //
+    // ignore: deprecated_member_use
+    sliderTheme: const SliderThemeData(year2023: false),
     chipTheme: ChipThemeData(shape: kShape),
     pageTransitionsTheme: PageTransitionsTheme(
       builders: {
