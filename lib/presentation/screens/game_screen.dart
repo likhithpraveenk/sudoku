@@ -5,6 +5,7 @@ import 'package:sudoku/domain/models/game_state.dart';
 import 'package:sudoku/presentation/shared/utils.dart';
 import 'package:sudoku/presentation/widgets/action_row.dart';
 import 'package:sudoku/presentation/widgets/digit_pad.dart';
+import 'package:sudoku/presentation/widgets/export_sheet.dart';
 import 'package:sudoku/presentation/widgets/game_layout.dart';
 import 'package:sudoku/presentation/widgets/grid_widget.dart';
 import 'package:sudoku/presentation/widgets/solved_overlay.dart';
@@ -120,20 +121,41 @@ class GameScreen extends ConsumerWidget {
               child: Padding(
                 padding: const .all(6),
                 child: Row(
-                  mainAxisAlignment: .spaceBetween,
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.chevron_left),
+                    Expanded(
+                      // heightFactor keeps this slot the height of its button; an
+                      // Align without it stretches to the tallest allowed size and
+                      // drags the whole row, and the timer, down the screen.
+                      child: Align(
+                        alignment: .centerLeft,
+                        heightFactor: 1,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.chevron_left),
+                        ),
+                      ),
                     ),
                     if (showTimer && game != null && !game.puzzleComplete)
                       Text(
                         formatTime(game.elapsed),
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
-                    const ThemeSelector(),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: .end,
+                        children: [
+                          if (game != null)
+                            IconButton(
+                              tooltip: 'Export puzzle',
+                              onPressed: () => showExportSheet(context, game),
+                              icon: const Icon(Icons.ios_share_rounded),
+                            ),
+                          const ThemeSelector(),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
