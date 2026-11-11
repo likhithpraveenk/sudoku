@@ -99,7 +99,7 @@ class GameState {
       puzzle: Puzzle(given: given, solution: solution),
       grid: grid,
       notes: notes,
-      history: const [],
+      history: GameAction.listFromJson(json['history']),
       puzzleComplete: json['puzzleComplete'] as bool? ?? false,
       assists: GameAssists(
         hints: assistsMap['hints'] as bool,
@@ -116,6 +116,7 @@ class GameState {
     'solutionValues': puzzle.solution.values,
     'givenValues': puzzle.given.values,
     'notes': notes.map((s) => s.toList()).toList(),
+    'history': [for (final action in history) action.toJson()],
     'assists': {
       'hints': assists.hints,
       'autoNotes': assists.autoNotes,
